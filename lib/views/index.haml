@@ -1,0 +1,60 @@
+!!!
+%html
+  %head
+    %script(src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript")
+    %script(src="http://code.highcharts.com/highcharts.js" type="text/javascript")
+  %body
+    %h1 Datagram
+    %form(action="/" method="get")
+      %textarea(name="sql" cols="100" rows="5")=@sql
+      %button(type="submit") Run Query
+    -if @ds
+      %table
+        %thead
+          %tr
+            -@ds.columns.each do |col|
+              %th=col
+        %tbody
+          -@ds.each do |row|
+            %tr
+              -@ds.columns.each do |col|
+                %td=row[col]
+      #chart
+      :javascript
+        $(document).ready(function() {
+            chart = new Highcharts.Chart({
+                chart: {
+                    renderTo: 'chart',
+                    type: 'spline'
+                },
+                title: {
+                    text: 'Data'
+                },
+                subtitle: {
+                    text: 'Subtitle'
+                },
+                xAxis: {
+                    type: 'datetime',
+                    dateTimeLabelFormats: { // don't display the dummy year
+                        month: '%e. %b',
+                        year: '%b'
+                    }
+                },
+                yAxis: {
+                    title: {
+                        text: 'Data'
+                    },
+                    min: 0
+                },
+                
+                series: [{
+                    // Define the data points. All series have a dummy year
+                    // of 1970/71 in order to be compared on the same x axis. Note
+                    // that in JavaScript, months start at 0 for January, 1 for February etc.
+                    data: [
+
+                      jQuery(#{JSON.generate @ds.map{ |r| [r[:x], r[:y]] } }).map(function(){ return [Date.parse(this[0]), this[1]] })
+                    ]
+                }]
+            });
+        });
