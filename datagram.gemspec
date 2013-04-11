@@ -8,7 +8,7 @@ Gem::Specification.new do |gem|
   gem.version       = Datagram::VERSION
   gem.authors       = ["Brad Gessler"]
   gem.email         = ["brad@polleverywhere.com"]
-  gem.description   = %q{TODO: Write a gem description}
+  gem.description   = %q{Gist for MySQL}
   gem.summary       = %q{TODO: Write a gem summary}
   gem.homepage      = ""
 

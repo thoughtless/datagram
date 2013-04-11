@@ -2,11 +2,7 @@
 %html
   %head
     %title Datagram
-    %script(src="https://raw.github.com/shutterstock/rickshaw/master/vendor/d3.min.js" type="text/javascript")
-    %script(src="https://raw.github.com/shutterstock/rickshaw/master/vendor/d3.layout.min.js" type="text/javascript")
-    %script(src="https://raw.github.com/shutterstock/rickshaw/master/rickshaw.min.js" type="text/javascript")
     %link(rel="stylesheet" type="text/css" href="/style.css")
-    %link(rel="stylesheet" type="text/css" href="http://code.shutterstock.com/rickshaw/rickshaw.min.css")
     %style
       :plain
         #chart_container {
@@ -29,29 +25,9 @@
       %br
       %button(type="submit") Run Query
     -if @ds
-      #chart_container
-        #y_axis
-        #chart
-
-      :javascript
-        var graph = new Rickshaw.Graph( {
-            element: document.querySelector("#chart"), 
-            renderer: 'bar',
-            width: 900,
-            height: 500,
-            series: [{
-                color: 'lightgray',
-                data: #{@ds.map{|r| { x: r[:x].to_time.to_i, y: r[:y].to_i } }.to_json}
-            }]
-        });
-        var x_axes = new Rickshaw.Graph.Axis.Time( { graph: graph } );
-        var y_axis = new Rickshaw.Graph.Axis.Y( {
-          graph: graph,
-          orientation: 'left',
-          tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-          element: document.getElementById('y_axis'),
-        } );
-        var hoverDetail = new Rickshaw.Graph.HoverDetail( {
-            graph: graph
-        } );
-        graph.render();
+      %table
+        %tbody
+          -@ds.each do |row|
+            %tr
+              -row.each do |col, data|
+                %td(class="#{col}")=data
