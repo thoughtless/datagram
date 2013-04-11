@@ -1,6 +1,6 @@
 # Datagram
 
-TODO: Write a gem description
+Gist for SQL Queries.
 
 ## Installation
 
