@@ -5,10 +5,10 @@
     %link(rel="stylesheet" type="text/css" href="/style.css")
     %link(href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet")
   %body
-    %form(action="/" method="get")
-      %textarea(name="sql" cols="100" rows="5")=@sql
-      .container
-        %button.btn.btn-large.btn-primary(type="submit") Run Query
+    %form(action="/queries" method="post")
+      %textarea(name="content")=@sql
+      %button.btn.btn-large.btn-primary(type="submit") Run Query
+      %button.btn.btn-success Save Query
 
     -if @ds
       .query-results
