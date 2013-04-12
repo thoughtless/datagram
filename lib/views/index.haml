@@ -3,31 +3,21 @@
   %head
     %title Datagram
     %link(rel="stylesheet" type="text/css" href="/style.css")
-    %style
-      :plain
-        #chart_container {
-                position: relative;
-                font-family: Arial, Helvetica, sans-serif;
-        }
-        #chart {
-                position: relative;
-                left: 40px;
-        }
-        #y_axis {
-                position: absolute;
-                top: 0;
-                bottom: 0;
-                width: 40px;
-        }
+    %link(href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet")
   %body
     %form(action="/" method="get")
       %textarea(name="sql" cols="100" rows="5")=@sql
-      %br
-      %button(type="submit") Run Query
+      .container
+        %button.btn.btn-large.btn-primary(type="submit") Run Query
+
     -if @ds
-      %table
-        %tbody
-          -@ds.each do |row|
-            %tr
-              -row.each do |col, data|
-                %td(class="#{col}")=data
+      .query-results
+        %table.table.table-striped
+          %thead
+            -columns = @ds.columns.each do |col|
+              %th=col
+          %tbody
+            -@ds.each do |row|
+              %tr
+                -row.each do |col, data|
+                  %td=data

@@ -8,6 +8,8 @@ require 'json'
 module Datagram
   class App < Sinatra::Base
     get '/' do
+      # @test = self.class.query_db.fetch('select * from queries;')
+
       if @sql = params[:sql]
         @ds = self.class.reporting_db.fetch(@sql)
       end
