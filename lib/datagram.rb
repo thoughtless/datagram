@@ -9,7 +9,7 @@ module Datagram
   class App < Sinatra::Base
     get '/' do
       if @sql = params[:sql]
-        @ds = self.class.db.fetch(@sql)
+        @ds = self.class.reporting_db.fetch(@sql)
       end
       haml :index
     end
@@ -20,8 +20,12 @@ module Datagram
     end
 
   private
-    def self.db
-      @db ||= Sequel.connect(ENV['DATABASE_URL'])
+    def self.reporting_db
+      @reporting_db ||= Sequel.connect(ENV['REPORTING_DATABASE_URL'])
+    end
+
+    def self.query_db
+      @query_db ||= Sequel.connect(ENV['QUERY_DATABASE_URL'])
     end
   end
 end
