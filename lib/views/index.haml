@@ -9,9 +9,11 @@
 
   .btn-group.navigation
     %button.btn.btn-show-results
-      %i.icon-list
+      %i.icon-table
 
-  %h2.title Datagram
+  .title
+    %h2 Datagram
+    %input.edit-title.display-none(type='text' value='Datagram')
 
 .file-tree
   %h4.title Saved Queries
@@ -22,7 +24,7 @@
 #editor
 #filter-editor
 
-#results.hidden
+#results.display-none
   %h1 Results
 
 .query-results
@@ -71,6 +73,8 @@
   filterSession = editor.getSession()
 
   filterEditor.setShowPrintMargin(false)
+  filterEditor.clearSelection()
+
   filterEditor.renderer.setShowGutter(false)
 
   filterSession.setTabSize(2)
@@ -78,6 +82,32 @@
   filterSession.setMode(new JavaScriptMode())
 
   $ ->
+    $(document).on 'click', (e) ->
+      $target = $(e.target)
+
+      return if $target.is('.title .edit-title, .title h2')
+
+      queryName = $('header .title .edit-title').val()
+
+      $('header .title h2').removeClass('display-none').text(queryName)
+      $('header .title .edit-title').addClass 'display-none'
+
+    $('header .title .edit-title').on 'keydown', (e) ->
+      return unless e.keyCode is 13
+
+      queryName = $('header .title .edit-title').val()
+
+      $('header .title h2').removeClass('display-none').text(queryName)
+      $('header .title .edit-title').addClass 'display-none'
+
+    $('header .title h2').on 'click', (e) ->
+      $target = $(e.currentTarget)
+
+      width = $target.width()
+
+      $target.addClass 'display-none'
+      $target.next().removeClass('display-none').width(width).select()
+
     $('.file-tree .query').on 'click', (e) ->
       $target = $(e.currentTarget)
 
@@ -97,11 +127,11 @@
       $target.toggleClass 'active'
 
       if $target.is('.active')
-        $editor.addClass 'hidden'
-        $results.removeClass 'hidden'
+        $editor.addClass 'display-none'
+        $results.removeClass 'display-none'
       else
-        $editor.removeClass 'hidden'
-        $results.addClass 'hidden'
+        $editor.removeClass 'display-none'
+        $results.addClass 'display-none'
 
     $('.btn-save').on 'click', ->
       $.ajax

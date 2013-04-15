@@ -16,7 +16,7 @@ body
   ul
     list-style: none
 
-.hidden
+.display-none
   display: none
 
 .file-tree
@@ -81,6 +81,29 @@ header
     text-align: center
     font-weight: normal
     margin-top: 4px
+
+    h2
+      text-shadow: rgba(0,0,0,0.3) 1px 1px 0
+      cursor: pointer
+      font-weight: inherit
+      margin: auto
+      display: inline-block
+
+      &.display-none
+        display: none
+
+    .edit-title
+      box-sizing: border-box
+      margin: 0
+      font-size: 31.5px
+      width: 140px
+      padding: 0
+      border-radius: 0
+      border: none
+      height: 40px
+
+      &.display-none
+        display: none
 
   .btn-group
     position: absolute
