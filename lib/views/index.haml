@@ -1,23 +1,109 @@
-!!!
-%html
-  %head
-    %title Datagram
-    %link(rel="stylesheet" type="text/css" href="/style.css")
-    %link(href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet")
-  %body
-    %form(action="/queries" method="post")
-      %textarea(name="content")=@sql
-      %button.btn.btn-large.btn-primary(type="submit") Run Query
-      %button.btn.btn-success Save Query
+%header
+  .btn-group.actions
+    %button.btn.btn-run(title='Run this query')
+      %i.icon-play
+    %button.btn.btn-save(title='Save this query')
+      %i.icon-save
+    %button.btn.btn-delete(title='Delete this query')
+      %i.icon-trash
 
-    -if @ds
-      .query-results
-        %table.table.table-striped
-          %thead
-            -columns = @ds.columns.each do |col|
-              %th=col
-          %tbody
-            -@ds.each do |row|
-              %tr
-                -row.each do |col, data|
-                  %td=data
+  .btn-group.navigation
+    %button.btn.btn-show-results
+      %i.icon-list
+
+  %h2.title Datagram
+
+.file-tree
+  %h4.title Saved Queries
+  %ul.queries
+    -@queries.each do |query|
+      %li.query(data-content="#{query.content}")="Query #{query.id}"
+
+#editor
+#results.hidden
+  %h1 Results
+
+.query-results
+  %table.table.table-striped.results
+    %thead
+    %tbody
+
+:coffeescript
+  editor = ace.edit('editor')
+
+  editor.setValue """
+  --Enter your SQL query below.
+  --You can run, save, or delete queries using the buttons above
+
+  SELECT *
+  FROM users
+  """
+
+  SQLMode = require('ace/mode/sql').Mode
+
+  editorSession = editor.getSession()
+
+  editor.setShowPrintMargin(false)
+  editor.renderer.setShowGutter(false)
+
+  editorSession.setTabSize(2)
+  editorSession.setUseSoftTabs(true)
+  editorSession.setMode(new SQLMode())
+
+  $ ->
+    $('.file-tree .query').on 'click', (e) ->
+      $target = $(e.currentTarget)
+
+      $('.query').removeClass 'active'
+
+      $target.addClass 'active'
+
+      editor.setValue $target.attr('data-content')
+
+    $('.btn-show-results').on 'click', (e) ->
+      $target = $(e.currentTarget)
+
+      $editor = $('#editor')
+      $results = $('#results')
+
+      $target.toggleClass 'active'
+
+      if $target.is('.active')
+        $editor.addClass 'hidden'
+        $results.removeClass 'hidden'
+      else
+        $editor.removeClass 'hidden'
+        $results.addClass 'hidden'
+
+    $('.btn-save').on 'click', ->
+      $.ajax
+        type: "POST"
+        url: '/queries'
+        data:
+          content: editor.getValue()
+        dataType: 'json'
+        success: (data) ->
+          console.log data
+
+    $('.btn-run').on 'click', ->
+      $.ajax
+        type: "GET"
+        url: '/run'
+        data:
+          content: editor.getValue()
+        success: (data) ->
+          window.results = data.items
+
+          $('.results thead, .results tbody').empty()
+
+          for column in data.columns
+            $('table thead').append "<th>\#{column}</th>"
+
+          for item in data.items
+            $tr = $('<tr>')
+
+            for key, value of item
+              $tr.append "<td>\#{value}</td>"
+
+            $('table tbody').append $tr
+        dataType: 'json'

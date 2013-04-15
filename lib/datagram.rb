@@ -6,35 +6,41 @@ require 'haml'
 require 'json'
 
 module Datagram
+  Sequel::Model.plugin :json_serializer
+
   db = Sequel.connect(ENV['QUERY_DATABASE_URL'])
 
   class Query < Sequel::Model
   end
 
   class App < Sinatra::Base
+    set :public_dir, 'public'
+
     get '/' do
-      if @sql = params[:content]
-        @ds = self.class.reporting_db.fetch(@sql)
-      end
+      @queries = Query.all
+
       haml :index
     end
 
     post '/queries' do
-      if @content = params[:content]
-        filter = params[:filter] || ''
+      @content = params[:content]
+      @filter = params[:filter] || ''
 
-        if query = Query.create(:content => @content, :filter => filter)
-          redirect "/queries/#{query.values[:id]}"
-        else
-          p 'kaboom'
-        end
+      if query = Query.create(:content => @content, :filter => @filter)
+        status 200
+        body(query.to_json)
       end
     end
 
-    get '/queries/:id' do |id|
-      @query = Query[id]
+    get '/run' do
+      @content = params[:content]
+      @filter = params[:filter] || ''
 
-      haml :show
+      @ds = self.class.reporting_db.fetch(@content)
+      results = @ds.to_a
+
+      status 200
+      body({:columns => @ds.columns, :items => results}.to_json)
     end
 
     delete '/queries/:id' do |id|

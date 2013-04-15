@@ -1,0 +1,5 @@
+%p=@query.values[:content]
+%form(action="/queries/#{@query.values[:id]}" method="post" onsubmit="return confirm('Are you sure you want to delete?');")
+  %input(type='hidden' name="_method" value="delete")
+  %button.btn.btn-primary(type='submit' name='copy') Copy Query
+  %button.btn.btn-danger(type='submit' name='delete') Delete Query

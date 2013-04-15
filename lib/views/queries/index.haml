@@ -1,0 +1,4 @@
+%ul
+  -@queries.each do |query|
+    %li
+      %a(href="/queries/#{query.values[:id]}")= query.values[:content]
