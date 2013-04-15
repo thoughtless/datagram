@@ -17,9 +17,11 @@
   %h4.title Saved Queries
   %ul.queries
     -@queries.each do |query|
-      %li.query(data-content="#{query.content}")="Query #{query.id}"
+      %li.query(data-content="#{query.content}" data-filter="#{query.filter}")="Query #{query.id}"
 
 #editor
+#filter-editor
+
 #results.hidden
   %h1 Results
 
@@ -32,8 +34,10 @@
   editor = ace.edit('editor')
 
   editor.setValue """
-  --Enter your SQL query below.
-  --You can run, save, or delete queries using the buttons above
+  /*
+  Enter your SQL query below.
+  You can run, save, or delete queries using the buttons above
+  */
 
   SELECT *
   FROM users
@@ -50,6 +54,29 @@
   editorSession.setUseSoftTabs(true)
   editorSession.setMode(new SQLMode())
 
+  filterEditor = ace.edit('filter-editor')
+
+  filterEditor.setValue """
+  // Enter your JavaScript filter below.
+  // Filters modify the returned SQL dataset
+  // Query results are available for manipulation
+  // via the global variable `results`
+  window.names = results.map(function(result, index) {
+    return result.first_name + " " + results.last_name
+  });
+  """
+
+  JavaScriptMode = require('ace/mode/javascript').Mode
+
+  filterSession = editor.getSession()
+
+  filterEditor.setShowPrintMargin(false)
+  filterEditor.renderer.setShowGutter(false)
+
+  filterSession.setTabSize(2)
+  filterSession.setUseSoftTabs(true)
+  filterSession.setMode(new JavaScriptMode())
+
   $ ->
     $('.file-tree .query').on 'click', (e) ->
       $target = $(e.currentTarget)
@@ -59,6 +86,7 @@
       $target.addClass 'active'
 
       editor.setValue $target.attr('data-content')
+      filterEditor.setValue $target.attr('data-filter')
 
     $('.btn-show-results').on 'click', (e) ->
       $target = $(e.currentTarget)

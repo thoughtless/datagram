@@ -1,6 +1,6 @@
 $header-height: 50px
 
-$editor-height: 150px
+$editor-height: 44%
 $editor-width: 85%
 
 $file-tree-width: 15%
@@ -12,14 +12,6 @@ body
   font-family: Helvetica, sans-serif
   font-size: 10.5pt
   margin: 0
-
-  textarea
-    box-sizing: border-box
-
-    background: none
-    font-family: Monaco, fixed
-    min-height: 150px
-    width: 100%
 
   ul
     list-style: none
@@ -55,11 +47,18 @@ body
     margin-top: 14px
     margin-bottom: 14px
 
-#editor
+#editor, #filter-editor
   box-sizing: border-box
 
   left: $file-tree-width
+  right: 0
   width: $editor-width
+  height: $editor-height
+  position: absolute
+  border-top: 1px solid rgba(0, 0, 0, 0.2)
+
+#filter-editor
+  top: 50%
 
 header
   height: $header-height
@@ -99,7 +98,6 @@ header
   top: $header-height
 
 #editor
-  right: 0
   bottom: 0
 
 .run, .save
