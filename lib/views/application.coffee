@@ -1,3 +1,4 @@
+## configure editors
 editor = ace.edit('editor')
 editor.setTheme('ace/theme/tomorrow')
 editor.session.setMode('ace/mode/sql')
@@ -28,7 +29,8 @@ filterEditor.setValue """
 // Enter your JavaScript filter below.
 // Filters modify the returned SQL dataset
 // Query results are available for manipulation
-// via the global variable `results`
+// via the global variable `results`. Your filtered
+// results will be used to build the report.
 window.names = results.map(function(result, index) {
   return result.first_name + " " + results.last_name
 });
@@ -43,14 +45,23 @@ filterEditor.renderer.setShowGutter(false)
 
 filterSession.setTabSize(2)
 filterSession.setUseSoftTabs(true)
+##
 
 $ ->
   addQuery = (data) ->
-    queryName = if data.name.length then data.name else "Query \#{data.id}"
+    queryName = if data.name.length then data.name else "Query #{data.id}"
 
-    $query = "<li class='query' data-content='\#{data.content}' data-filter='\#{data.filter}' data-name='\#{data.name}' data-id='\#{data.id}''>\#{queryName}</li>"
+    $query = "<li class='query' data-content='#{data.content}' data-filter='#{data.filter}' data-name='#{data.name}' data-id='#{data.id}''>#{queryName}</li>"
 
     $('.queries').append $query
+
+  updateQuery = (data) ->
+    $query = $('.query.active')
+
+    $query.attr
+      'data-name': data.name
+      'data-filter': data.filter
+      'data-content': data.content
 
   updateQueryName = (newName) ->
     $('header .title .name').removeClass('display-none').text(newName)
@@ -60,25 +71,34 @@ $ ->
       $query.text(newName)
       $query.attr('data-name', newName)
 
-  resultsTable = (data) ->
+  resultsTable = (data, filter) ->
     # export results to the global scope
     # so people can tweak them.
     window.results = data.items
 
+    if filter.length
+      window.filteredResults = eval(filter)
+
     $('.results thead, .results tbody').empty()
 
     for column in data.columns
-      $('table thead').append "<th>\#{column}</th>"
+      $('table thead').append "<th>#{column}</th>"
 
-    for item in data.items
+    for item in (if filteredResults?.length then filteredResults else results)
       $tr = $('<tr>')
 
       for key, value of item
-        $tr.append "<td>\#{value}</td>"
+        $tr.append "<td>#{value}</td>"
 
       $('table tbody').append $tr
 
-    debugger
+  $('.icon-remove').on 'click', ->
+    $('.error-message').addClass('display-none')
+
+  $(document).on 'keydown', (e) ->
+    return unless e.keyCode is 27
+
+    $('.error-message').addClass('display-none')
 
   $(document).on 'click', (e) ->
     $target = $(e.target)
@@ -133,13 +153,31 @@ $ ->
       $('.results-content').addClass('display-none')
 
   $('.btn-save').on 'click', ->
+    $query = $('.query.active')
+
+    id = $query.data('id')
+    name = $query.data('name')
+
+    $.ajax
+      type: 'PUT'
+      url: "/queries/#{id}"
+      data:
+        content: editor.getValue()
+        filter: filterEditor.getValue()
+        name: name
+      dataType: 'json'
+      success: updateQuery
+
+  $('.btn-copy').on 'click', ->
+    queryName = $('header .title .name').text()
+
     $.ajax
       type: 'POST'
       url: '/queries'
       data:
         content: editor.getValue()
         filter: filterEditor.getValue()
-        name: $('header .title .name').text()
+        name: if queryName.length then queryName else 'new query'
       dataType: 'json'
       success: addQuery
 
@@ -150,7 +188,14 @@ $ ->
       data:
         content: editor.getValue()
       dataType: 'json'
-      success: resultsTable
+      success: (data) ->
+        resultsTable(data, filterEditor.getValue())
+      error: (response) ->
+        {message} = JSON.parse(response.responseText)
+
+        $('.error-message .text').text(message)
+
+        $('.error-message').removeClass('display-none')
 
   $('.btn-delete').on 'click', ->
     $query = $('.query.active')
@@ -158,12 +203,12 @@ $ ->
     alert "You must select a query to delete" unless $query.length
 
     id = $query.data('id')
-    queryName = if $query.data('name').length then $query.data('name') else "Query \#{id}"
+    queryName = if $query.data('name').length then $query.data('name') else "Query #{id}"
 
-    if confirm "Are you sure you want to delete \#{queryName}"
+    if confirm "Are you sure you want to delete '#{queryName}'?"
       $.ajax
         type: 'DELETE'
-        url: "queries/\#{id}"
+        url: "queries/#{id}"
         dataType: 'json'
         success: ->
           $query.remove()

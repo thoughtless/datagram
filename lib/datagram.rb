@@ -23,6 +23,22 @@ module Datagram
       haml :index
     end
 
+    get '/run' do
+      @content = params[:content]
+      @filter = params[:filter] || ''
+
+      begin
+        @ds = self.class.reporting_db.fetch(@content)
+        results = @ds.to_a
+
+        status 200
+        body({:columns => @ds.columns, :items => results}.to_json)
+      rescue Sequel::Error => e
+        status 500
+        body({:message => e.message}.to_json)
+      end
+    end
+
     post '/queries' do
       @content = params[:content]
       @filter = params[:filter] || ''
@@ -34,15 +50,17 @@ module Datagram
       end
     end
 
-    get '/run' do
-      @content = params[:content]
-      @filter = params[:filter] || ''
+    put '/queries/:id' do |id|
+      if query = Query[id]
+        name = params[:name] || "Query #{id}"
+        content = params[:content] || ''
+        filter = params[:filter] || ''
 
-      @ds = self.class.reporting_db.fetch(@content)
-      results = @ds.to_a
+        query.update_all :name => name, :content => content, :filter => filter
 
-      status 200
-      body({:columns => @ds.columns, :items => results}.to_json)
+        status 200
+        body(query.to_json)
+      end
     end
 
     delete '/queries/:id' do |id|

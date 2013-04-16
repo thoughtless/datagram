@@ -1,14 +1,16 @@
 %header
   .btn-group.actions
-    %button.btn.btn-run(title='Run this query')
-      %i.icon-play
     %button.btn.btn-save(title='Save this query')
       %i.icon-save
+    %button.btn.btn-copy(title='Copy this query')
+      %i.icon-copy
     %button.btn.btn-delete(title='Delete this query')
       %i.icon-trash
 
   .btn-group.navigation
-    %button.btn.btn-show-results
+    %button.btn.btn-run(title='Run this query')
+      %i.icon-play
+    %button.btn.btn-show-results(title='View query results')
       %i.icon-table
 
   .title
@@ -35,3 +37,7 @@
     %table.table.table-striped.results
       %thead
       %tbody
+
+.error-message.display-none
+  .text
+  .icon-remove
