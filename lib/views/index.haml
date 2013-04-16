@@ -36,6 +36,8 @@
 
 :coffeescript
   editor = ace.edit('editor')
+  editor.setTheme('ace/theme/tomorrow')
+  editor.session.setMode('ace/mode/sql')
 
   editor.setValue """
   /*
@@ -47,8 +49,6 @@
   FROM users
   """
 
-  SQLMode = require('ace/mode/sql').Mode
-
   editorSession = editor.getSession()
 
   editor.setShowPrintMargin(false)
@@ -56,9 +56,10 @@
 
   editorSession.setTabSize(2)
   editorSession.setUseSoftTabs(true)
-  editorSession.setMode(new SQLMode())
 
   filterEditor = ace.edit('filter-editor')
+  filterEditor.setTheme('ace/theme/tomorrow')
+  filterEditor.session.setMode('ace/mode/javascript')
 
   filterEditor.setValue """
   // Enter your JavaScript filter below.
@@ -70,9 +71,7 @@
   });
   """
 
-  JavaScriptMode = require('ace/mode/javascript').Mode
-
-  filterSession = editor.getSession()
+  filterSession = filterEditor.getSession()
 
   filterEditor.setShowPrintMargin(false)
   filterEditor.clearSelection()
@@ -81,9 +80,31 @@
 
   filterSession.setTabSize(2)
   filterSession.setUseSoftTabs(true)
-  filterSession.setMode(new JavaScriptMode())
 
   $ ->
+    addQuery = (data) ->
+      queryName = if data.name.length then data.name else "Query \#{data.id}"
+
+      $query = "<li class='query' data-content='\#{data.content}' data-filter='\#{data.filter}'>\#{queryName}</li>"
+
+      $('.queries').append $query
+
+    resultsTable = (data) ->
+      window.results = data.items
+
+      $('.results thead, .results tbody').empty()
+
+      for column in data.columns
+        $('table thead').append "<th>\#{column}</th>"
+
+      for item in data.items
+        $tr = $('<tr>')
+
+        for key, value of item
+          $tr.append "<td>\#{value}</td>"
+
+        $('table tbody').append $tr
+
     $(document).on 'click', (e) ->
       $target = $(e.target)
 
@@ -147,12 +168,7 @@
           filter: filterEditor.getValue()
           name: $('header .title .name').text()
         dataType: 'json'
-        success: (data) ->
-          queryName = if data.name.length then data.name else "Query \#{data.id}"
-
-          $query = "<li class='query' data-content='\#{data.content}' data-filter='\#{data.filter}'>\#{queryName}</li>"
-
-          $('.queries').append $query
+        success: addQuery
 
     $('.btn-run').on 'click', ->
       $.ajax
@@ -160,19 +176,5 @@
         url: '/run'
         data:
           content: editor.getValue()
-        success: (data) ->
-          window.results = data.items
-
-          $('.results thead, .results tbody').empty()
-
-          for column in data.columns
-            $('table thead').append "<th>\#{column}</th>"
-
-          for item in data.items
-            $tr = $('<tr>')
-
-            for key, value of item
-              $tr.append "<td>\#{value}</td>"
-
-            $('table tbody').append $tr
         dataType: 'json'
+        success: resultsTable
