@@ -139,6 +139,7 @@
         url: '/queries'
         data:
           content: editor.getValue()
+          filter: filterEditor.getValue()
         dataType: 'json'
         success: (data) ->
           console.log data
