@@ -5,7 +5,7 @@ $editor-width: 85%
 
 $file-tree-width: 15%
 
-html, body
+html, body, .query-content
   height: 100%
 
 body
@@ -16,6 +16,15 @@ body
   ul
     list-style: none
 
+.query-content, .results-content
+  position: absolute
+  top: $header-height
+  width: 100%
+
+.query-results
+  position: absolute
+  top: 50px
+
 .display-none
   display: none
 
@@ -23,9 +32,6 @@ body
   box-sizing: border-box
   color: white
   background-color: #333
-  position: absolute
-  padding-top: $header-height
-  left: 0
   width: $file-tree-width
   height: 100%
 
@@ -44,8 +50,9 @@ body
   .title
     color: white
     text-align: center
-    margin-top: 14px
-    margin-bottom: 14px
+    padding-top: 14px
+    padding-bottom: 14px
+    margin: 0
 
 #editor, #filter-editor
   box-sizing: border-box
@@ -58,7 +65,7 @@ body
   border-top: 1px solid rgba(0, 0, 0, 0.2)
 
 #filter-editor
-  top: 50%
+  top: 45%
 
 header
   height: $header-height
@@ -115,10 +122,9 @@ header
   .btn-group.actions
     left: 10px
 
-#editor, #results
+#editor, .results-content
   position: absolute
-  width: 100%
-  top: $header-height
+  top: 0
 
 #editor
   bottom: 0

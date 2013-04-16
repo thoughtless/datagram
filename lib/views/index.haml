@@ -15,24 +15,26 @@
     %h2.name
     %input.edit-title.display-none(type='text' value='')
 
-.file-tree
-  %h4.title Saved Queries
-  %ul.queries
-    -@queries.each do |query|
-      -queryName = query.name.nil? ? "Query #{query.id}" : query.name
+.query-content
+  .file-tree
+    %h4.title Saved Queries
+    %ul.queries
+      -@queries.each do |query|
+        -queryName = query.name.nil? ? "Query #{query.id}" : query.name
 
-      %li.query(data-content="#{query.content}" data-filter="#{query.filter}" data-name="#{query.name}" data-id="#{query.id}")=queryName
+        %li.query(data-content="#{query.content}" data-filter="#{query.filter}" data-name="#{query.name}" data-id="#{query.id}")=queryName
 
-#editor
-#filter-editor
+  #editor
+  #filter-editor
 
-#results.display-none
-  %h1 Results
+.results-content
+  #results.display-none
+    %h1 Results
 
-.query-results
-  %table.table.table-striped.results
-    %thead
-    %tbody
+  .query-results
+    %table.table.table-striped.results
+      %thead
+      %tbody
 
 :coffeescript
   editor = ace.edit('editor')
@@ -85,11 +87,21 @@
     addQuery = (data) ->
       queryName = if data.name.length then data.name else "Query \#{data.id}"
 
-      $query = "<li class='query' data-content='\#{data.content}' data-filter='\#{data.filter}' data-id='\#{data.id}''>\#{queryName}</li>"
+      $query = "<li class='query' data-content='\#{data.content}' data-filter='\#{data.filter}' data-name='\#{data.name}' data-id='\#{data.id}''>\#{queryName}</li>"
 
       $('.queries').append $query
 
+    updateQueryName = (newName) ->
+      $('header .title .name').removeClass('display-none').text(newName)
+      $('header .title .edit-title').addClass('display-none')
+
+      if ($query = $('.query.active')).length
+        $query.text(newName)
+        $query.attr('data-name', newName)
+
     resultsTable = (data) ->
+      # export results to the global scope
+      # so people can tweak them.
       window.results = data.items
 
       $('.results thead, .results tbody').empty()
@@ -110,18 +122,16 @@
 
       return if $target.is('.title .edit-title, .title h2')
 
-      queryName = $('header .title .edit-title').val()
+      name = $('header .title .edit-title').val()
 
-      $('header .title h2').removeClass('display-none').text(queryName)
-      $('header .title .edit-title').addClass 'display-none'
+      updateQueryName(name)
 
     $('header .title .edit-title').on 'keydown', (e) ->
       return unless e.keyCode is 13
 
-      queryName = $('header .title .edit-title').val()
+      name = $('header .title .edit-title').val()
 
-      $('header .title h2').removeClass('display-none').text(queryName)
-      $('header .title .edit-title').addClass 'display-none'
+      updateQueryName(name)
 
     $('header .title h2').on 'click', (e) ->
       $target = $(e.currentTarget)
@@ -153,11 +163,11 @@
       $target.toggleClass 'active'
 
       if $target.is('.active')
-        $editor.addClass 'display-none'
-        $results.removeClass 'display-none'
+        $('.query-content').addClass('display-none')
+        $('.results-content').removeClass('display-none')
       else
-        $editor.removeClass 'display-none'
-        $results.addClass 'display-none'
+        $('.query-content').removeClass('display-none')
+        $('.results-content').addClass('display-none')
 
     $('.btn-save').on 'click', ->
       $.ajax
@@ -192,6 +202,5 @@
           type: 'DELETE'
           url: "queries/\#{id}"
           dataType: 'json'
-          success: (data) ->
+          success: ->
             $query.remove()
-            console.log data

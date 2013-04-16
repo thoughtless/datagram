@@ -49,8 +49,7 @@ module Datagram
 
       @query.destroy
 
-      status 200
-      body({:ok => true}.to_json)
+      status 204
     end
 
     get '/style.css' do
