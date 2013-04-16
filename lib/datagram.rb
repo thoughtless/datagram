@@ -25,8 +25,9 @@ module Datagram
     post '/queries' do
       @content = params[:content]
       @filter = params[:filter] || ''
+      @name = params[:name] || ''
 
-      if query = Query.create(:content => @content, :filter => @filter)
+      if query = Query.create(:content => @content, :filter => @filter, :name => @name)
         status 200
         body(query.to_json)
       end

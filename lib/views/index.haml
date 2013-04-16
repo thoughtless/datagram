@@ -12,14 +12,16 @@
       %i.icon-table
 
   .title
-    %h2 Datagram
+    %h2.name Datagram
     %input.edit-title.display-none(type='text' value='Datagram')
 
 .file-tree
   %h4.title Saved Queries
   %ul.queries
     -@queries.each do |query|
-      %li.query(data-content="#{query.content}" data-filter="#{query.filter}")="Query #{query.id}"
+      -queryName = query.name.nil? ? "Query #{query.id}" : query.name
+
+      %li.query(data-content="#{query.content}" data-filter="#{query.filter}")=queryName
 
 #editor
 #filter-editor
@@ -108,7 +110,7 @@
       $target.addClass 'display-none'
       $target.next().removeClass('display-none').width(width).select()
 
-    $('.file-tree .query').on 'click', (e) ->
+    $('.file-tree').on 'click', '.query', (e) ->
       $target = $(e.currentTarget)
 
       $('.query').removeClass 'active'
@@ -117,6 +119,9 @@
 
       editor.setValue $target.attr('data-content')
       filterEditor.setValue $target.attr('data-filter')
+
+      $('header .title .name').text($target.text())
+      $('header .title .edit-title').val($target.text())
 
     $('.btn-show-results').on 'click', (e) ->
       $target = $(e.currentTarget)
@@ -140,9 +145,14 @@
         data:
           content: editor.getValue()
           filter: filterEditor.getValue()
+          name: $('header .title .name').text()
         dataType: 'json'
         success: (data) ->
-          console.log data
+          queryName = if data.name.length then data.name else "Query \#{data.id}"
+
+          $query = "<li class='query' data-content='\#{data.content}' data-filter='\#{data.filter}'>\#{queryName}</li>"
+
+          $('.queries').append $query
 
     $('.btn-run').on 'click', ->
       $.ajax
