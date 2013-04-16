@@ -1,5 +1,6 @@
 require "datagram/version"
 
+require 'coffee-script'
 require 'sinatra'
 require 'sequel'
 require 'haml'
@@ -55,6 +56,10 @@ module Datagram
     get '/style.css' do
       content_type 'text/css', :charset => 'utf-8'
       sass :style
+    end
+
+    get '/application.js' do
+      coffee :application
     end
 
   private
