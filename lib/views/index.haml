@@ -12,8 +12,8 @@
       %i.icon-table
 
   .title
-    %h2.name Datagram
-    %input.edit-title.display-none(type='text' value='Datagram')
+    %h2.name
+    %input.edit-title.display-none(type='text' value='')
 
 .file-tree
   %h4.title Saved Queries
@@ -21,7 +21,7 @@
     -@queries.each do |query|
       -queryName = query.name.nil? ? "Query #{query.id}" : query.name
 
-      %li.query(data-content="#{query.content}" data-filter="#{query.filter}")=queryName
+      %li.query(data-content="#{query.content}" data-filter="#{query.filter}" data-name="#{query.name}" data-id="#{query.id}")=queryName
 
 #editor
 #filter-editor
@@ -85,7 +85,7 @@
     addQuery = (data) ->
       queryName = if data.name.length then data.name else "Query \#{data.id}"
 
-      $query = "<li class='query' data-content='\#{data.content}' data-filter='\#{data.filter}'>\#{queryName}</li>"
+      $query = "<li class='query' data-content='\#{data.content}' data-filter='\#{data.filter}' data-id='\#{data.id}''>\#{queryName}</li>"
 
       $('.queries').append $query
 
@@ -161,7 +161,7 @@
 
     $('.btn-save').on 'click', ->
       $.ajax
-        type: "POST"
+        type: 'POST'
         url: '/queries'
         data:
           content: editor.getValue()
@@ -172,9 +172,26 @@
 
     $('.btn-run').on 'click', ->
       $.ajax
-        type: "GET"
+        type: 'GET'
         url: '/run'
         data:
           content: editor.getValue()
         dataType: 'json'
         success: resultsTable
+
+    $('.btn-delete').on 'click', ->
+      $query = $('.query.active')
+
+      alert "You must select a query to delete" unless $query.length
+
+      id = $query.data('id')
+      queryName = if $query.data('name').length then $query.data('name') else "Query \#{id}"
+
+      if confirm "Are you sure you want to delete \#{queryName}"
+        $.ajax
+          type: 'DELETE'
+          url: "queries/\#{id}"
+          dataType: 'json'
+          success: (data) ->
+            $query.remove()
+            console.log data
