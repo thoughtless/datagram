@@ -4,6 +4,7 @@ gem 'coffee-script'
 gem 'thin'
 gem 'mysql2'
 gem 'json'
+gem 'therubyracer'
 gem 'sass'
 gem 'sqlite3'
 

@@ -3,16 +3,6 @@ editor = ace.edit('editor')
 editor.setTheme('ace/theme/tomorrow')
 editor.session.setMode('ace/mode/sql')
 
-editor.setValue """
-/*
-Enter your SQL query below.
-You can run, save, or delete queries using the buttons above
-*/
-
-SELECT *
-FROM users
-"""
-
 editorSession = editor.getSession()
 
 editor.setShowPrintMargin(false)
@@ -24,17 +14,6 @@ editorSession.setUseSoftTabs(true)
 filterEditor = ace.edit('filter-editor')
 filterEditor.setTheme('ace/theme/tomorrow')
 filterEditor.session.setMode('ace/mode/javascript')
-
-filterEditor.setValue """
-// Enter your JavaScript filter below.
-// Filters modify the returned SQL dataset
-// Query results are available for manipulation
-// via the global variable `results`. Your filtered
-// results will be used to build the report.
-window.names = results.map(function(result, index) {
-  return result.first_name + " " + results.last_name
-});
-"""
 
 filterSession = filterEditor.getSession()
 
@@ -48,6 +27,12 @@ filterSession.setUseSoftTabs(true)
 ##
 
 $ ->
+  setTimeout ->
+    # default to selecting the last query
+    if ($last = $('.query:last')).length
+      $last.click()
+  , 1
+
   addQuery = (data) ->
     queryName = if data.name.length then data.name else "Query #{data.id}"
 
@@ -179,7 +164,9 @@ $ ->
         filter: filterEditor.getValue()
         name: if queryName.length then queryName else 'new query'
       dataType: 'json'
-      success: addQuery
+      success: (data) ->
+        addQuery(data)
+        $('.query:last').click()
 
   $('.btn-run').on 'click', ->
     $.ajax
@@ -191,11 +178,12 @@ $ ->
       success: (data) ->
         resultsTable(data, filterEditor.getValue())
       error: (response) ->
-        {message} = JSON.parse(response.responseText)
+        try
+          {message} = JSON.parse(response.responseText)
 
-        $('.error-message .text').text(message)
+          $('.error-message .text').text(message)
 
-        $('.error-message').removeClass('display-none')
+          $('.error-message').removeClass('display-none')
 
   $('.btn-delete').on 'click', ->
     $query = $('.query.active')
@@ -211,4 +199,10 @@ $ ->
         url: "queries/#{id}"
         dataType: 'json'
         success: ->
+          debugger
+          if ($next = $query.next()).length
+            $next.addClass 'active'
+          else if ($previous = $query.prev()).length
+            $previous.addClass 'active'
+
           $query.remove()

@@ -6,6 +6,8 @@ require 'sequel'
 require 'haml'
 require 'json'
 
+require 'v8'
+
 module Datagram
   Sequel::Model.plugin :json_serializer
 
@@ -18,6 +20,29 @@ module Datagram
     set :public_dir, 'public'
 
     get '/' do
+      if Query.count == 0
+        content = """/*
+Enter your SQL query below.
+You can run, save, or delete queries using the buttons above
+*/
+
+SELECT *
+FROM users
+"""
+
+        filter = """// Enter your JavaScript filter below.
+// Filters modify the returned SQL dataset
+// Query results are available for manipulation
+// via the global variable `results`. Your filtered
+// results will be used to build the report.
+[results[0]]
+"""
+
+        name = 'default query'
+
+        Query.create :content => content, :filter => filter, :name => name
+      end
+
       @queries = Query.all
 
       haml :index
@@ -50,6 +75,23 @@ module Datagram
       end
     end
 
+    get '/queries/:id' do |id|
+      if query = Query[id]
+        status 200
+
+        @ds = self.class.reporting_db.fetch(query.content)
+        results = @ds.to_a
+
+        context = V8::Context.new
+
+        context['results'] = results
+        context['filter'] = query.filter
+        context['filteredResults'] = context.eval('JSON.stringify(eval(filter))')
+
+        body(context['filteredResults'])
+      end
+    end
+
     put '/queries/:id' do |id|
       if query = Query[id]
         name = params[:name] || "Query #{id}"
@@ -71,6 +113,7 @@ module Datagram
       status 204
     end
 
+    # assets
     get '/style.css' do
       content_type 'text/css', :charset => 'utf-8'
       sass :style
