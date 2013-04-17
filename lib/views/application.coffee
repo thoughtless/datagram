@@ -199,7 +199,6 @@ $ ->
         url: "queries/#{id}"
         dataType: 'json'
         success: ->
-          debugger
           if ($next = $query.next()).length
             $next.addClass 'active'
           else if ($previous = $query.prev()).length
