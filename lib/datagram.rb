@@ -77,8 +77,6 @@ FROM users
 
     get '/queries/:id' do |id|
       if query = Query[id]
-        status 200
-
         @ds = self.class.reporting_db.fetch(query.content)
         results = @ds.to_a
 
@@ -88,7 +86,13 @@ FROM users
         context['filter'] = query.filter
         context['filteredResults'] = context.eval('JSON.stringify(eval(filter))')
 
-        body(context['filteredResults'])
+        status 200
+
+        if context['filteredResults'].nil?
+          body(results.to_json)
+        else
+          body(context['filteredResults'])
+        end
       end
     end
 

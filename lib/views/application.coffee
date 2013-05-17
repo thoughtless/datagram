@@ -60,6 +60,7 @@ $ ->
     # export results to the global scope
     # so people can tweak them.
     window.results = data.items
+    console.log(results)
 
     if filter.length
       window.filteredResults = eval(filter)
