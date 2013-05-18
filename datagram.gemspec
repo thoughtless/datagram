@@ -6,11 +6,11 @@ require 'datagram/version'
 Gem::Specification.new do |gem|
   gem.name          = "datagram"
   gem.version       = Datagram::VERSION
-  gem.authors       = ["Brad Gessler"]
-  gem.email         = ["brad@polleverywhere.com"]
+  gem.authors       = ["Matt Diebolt", "Brad Gessler"]
+  gem.email         = ["matt@polleverywhere.com", "brad@polleverywhere.com"]
   gem.description   = %q{Gist for MySQL}
-  gem.summary       = %q{TODO: Write a gem summary}
-  gem.homepage      = ""
+  gem.summary       = %q{Like Gist, for SQL.}
+  gem.homepage      = "https://github.com/polleverywhere/datagram"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
