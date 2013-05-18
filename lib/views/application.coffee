@@ -56,7 +56,7 @@ $ ->
       $query.text(newName)
       $query.attr('data-name', newName)
 
-  resultsTable = (data, filter) ->
+  exportResults = (data, filter) ->
     # export results to the global scope
     # so people can tweak them.
     window.results = data.items
@@ -65,12 +65,19 @@ $ ->
     if filter.length
       window.filteredResults = eval(filter)
 
+  displayResultsCount = (data) ->
+    $('.sql-results, .filter-results').show()
+
+    $('.sql-results .count').text("#{window.results.length} SQL results returned")
+    $('.filter-results .count').text("#{window.filteredResults.length} results after applying JavaScript filter")
+
+  resultsTable = (data, filter) ->
     $('.results thead, .results tbody').empty()
 
     for column in data.columns
       $('table thead').append "<th>#{column}</th>"
 
-    for item in (if filteredResults?.length then filteredResults else results)
+    for item in (if window.filteredResults?.length then window.filteredResults else window.results)
       $tr = $('<tr>')
 
       for key, value of item
@@ -177,7 +184,9 @@ $ ->
         content: editor.getValue()
       dataType: 'json'
       success: (data) ->
-        resultsTable(data, filterEditor.getValue())
+        exportResults(data, filterEditor.getValue())
+        resultsTable(data)
+        displayResultsCount(data)
       error: (response) ->
         try
           {message} = JSON.parse(response.responseText)
@@ -185,6 +194,11 @@ $ ->
           $('.error-message .text').text(message)
 
           $('.error-message').removeClass('display-none')
+
+  $('.sql-results, .filter-results').on 'click', (e) ->
+    $target = $(e.currentTarget)
+
+    $target.hide()
 
   $('.btn-delete').on 'click', ->
     $query = $('.query.active')
