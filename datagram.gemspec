@@ -19,5 +19,13 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency "sinatra", ">= 1.4.0"
   gem.add_dependency "haml"
+  gem.add_dependency "sass"
   gem.add_dependency "sequel"
+  gem.add_dependency "therubyracer"
+  gem.add_dependency "coffee-script"
+  gem.add_dependency "json"
+
+  gem.add_development_dependency 'thin'
+  gem.add_development_dependency 'mysql2'
+  gem.add_development_dependency 'sqlite3'
 end
