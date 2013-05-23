@@ -19,7 +19,12 @@ module Datagram
 
       # Now lets run the migrations
       Datagram.logger.info "Migrating `#{db.uri}`"
-      Sequel::Migrator.apply(db, Datagram::Model.migration_path)
+      Sequel::Migrator.apply(db, Datagram::Model::MIGRATION_PATH)
+    end
+
+    desc "version", "Current version of datagram"
+    def version
+      puts Datagram::VERSION
     end
   end
 end
