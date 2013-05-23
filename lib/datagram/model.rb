@@ -3,7 +3,7 @@ require 'sequel'
 module Datagram
   module Model
     # Default sqlite3 database location for storing queries.
-    QUERY_DATABASE_URL = 'sqlite://db/datagram.db'
+    QUERY_DATABASE_URL = 'sqlite://datagram.db'
 
     # Returns the migration path for the CLI.
     MIGRATION_PATH = File.expand_path('../../../db/migrate', __FILE__)
