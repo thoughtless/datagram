@@ -24,6 +24,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency "therubyracer"
   gem.add_dependency "coffee-script"
   gem.add_dependency "json"
+  gem.add_dependency "thor"
 
   gem.add_development_dependency 'thin'
   gem.add_development_dependency 'mysql2'
