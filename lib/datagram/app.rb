@@ -7,7 +7,7 @@ require 'v8'
 
 module Datagram
   class App < Sinatra::Base
-    set :public_dir, 'public'
+    set :public_dir, File.expand_path('../public', __FILE__)
 
     include Datagram::Model
 
