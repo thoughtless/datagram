@@ -96,6 +96,13 @@ $ ->
   $(document).on 'click', (e) ->
     $target = $(e.target)
 
+    return if $target.closest('.error-message').length
+
+    $('.error-message').addClass('display-none')
+
+  $(document).on 'click', (e) ->
+    $target = $(e.target)
+
     return if $target.is('.title .edit-title, .title h2')
 
     name = $('header .title .edit-title').val()
