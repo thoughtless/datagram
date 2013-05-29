@@ -39,7 +39,7 @@ $ ->
   addQuery = (data) ->
     queryName = if data.name.length then data.name else "Query #{data.id}"
 
-    $query = "<li class='query' data-content='#{data.content}' data-filter='#{data.filter}' data-name='#{data.name}' data-id='#{data.id}''>#{queryName}</li>"
+    $query = "<li class='query' data-content='#{data.content}' data-filter='#{data.filter}' data-name='#{data.name}' data-id='#{data.id}''>#{queryName}.icon-circle-blank</li>"
 
     $('.queries').append $query
 
@@ -74,7 +74,9 @@ $ ->
     $('.sql-results, .filter-results').show()
 
     $('.sql-results .count').text("#{window.results.length} SQL results returned")
-    $('.filter-results .count').text("#{window.filteredResults.length} results after applying JavaScript filter")
+
+    if window.filteredResults?
+      $('.filter-results .count').text("#{window.filteredResults.length} results after applying JavaScript filter")
 
   resultsTable = (data, filter) ->
     $('.results thead, .results tbody').empty()

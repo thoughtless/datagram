@@ -4,6 +4,7 @@ $editor-height: 30%
 $editor-width: 42.5%%
 
 $file-tree-width: 15%
+$file-tree-color: #3E2E2E
 
 html, body, .query-content
   height: 100%
@@ -13,8 +14,27 @@ body
   font-size: 10.5pt
   margin: 0
 
+  h1, h2, h3, h4, h5, h6
+    color: $file-tree-color
+
   ul
     list-style: none
+
+  .display-none
+    display: none
+
+.icon-lock
+  cursor: pointer
+  opacity: 0.4
+
+  &.active
+    opacity: 1
+
+.icon-circle-blank, .icon-lock, .icon-spinner, .icon-ok-circle
+  color: $file-tree-color
+  float: right
+  padding-top: 6px
+  padding-right: 7px
 
 .query-spinner
   position: absolute
@@ -69,17 +89,17 @@ body
   border-top: 1px solid rgba(0, 0, 0, 0.1)
   padding-left: 0.5em
 
+  h2
+    margin-top: 0
+
 .query-results
   position: absolute
   top: 50px
 
-.display-none
-  display: none
-
 .file-tree
   box-sizing: border-box
   color: white
-  background-color: #333
+  background-color: $file-tree-color
   width: $file-tree-width
   height: 100%
 
@@ -156,12 +176,12 @@ header
   width: 100%
 
   .title
-    color: white
     text-align: center
     font-weight: normal
     margin-top: 4px
 
     h2
+      color: white
       text-shadow: rgba(0,0,0,0.3) 1px 1px 0
       cursor: pointer
       font-weight: inherit
@@ -173,6 +193,7 @@ header
 
     .edit-title
       box-sizing: border-box
+      color: $file-tree-color
       margin: 0
       font-size: 31.5px
       width: 140px
