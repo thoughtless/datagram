@@ -83,8 +83,14 @@ body
     padding-bottom: 14px
     margin: 0
 
+.sql-results
+  left: 45%
+
 .sql-results, .filter-results
   z-index: 1000000
+  top: 30%
+  width: 160px
+  position: absolute
 
   .count
     position: absolute
@@ -93,10 +99,15 @@ body
     text-align: right
     width: 100%
 
+
+.filter-results
+  width: 300px
+  right: 0
+
 #editor
   border-right: 1px solid rgba(0, 0, 0, 0.1)
 
-#editor, #filter-editor, .sql-results, .filter-results
+#editor, #filter-editor
   box-sizing: border-box
 
   left: $file-tree-width
@@ -106,7 +117,7 @@ body
   border-top: 1px solid rgba(0, 0, 0, 0.2)
   top: 0
 
-.filter-results, #filter-editor
+#filter-editor
   left: 57.5%
 
 header

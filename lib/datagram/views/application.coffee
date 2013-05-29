@@ -165,21 +165,6 @@ $ ->
     $('header .title .name').text($target.text())
     $('header .title .edit-title').val($target.text())
 
-  $('.btn-show-results').on 'click', (e) ->
-    $target = $(e.currentTarget)
-
-    $editor = $('#editor')
-    $results = $('#results')
-
-    $target.toggleClass 'active'
-
-    if $target.is('.active')
-      $('.query-content').addClass('display-none')
-      $('.results-content').removeClass('display-none')
-    else
-      $('.query-content').removeClass('display-none')
-      $('.results-content').addClass('display-none')
-
   $('.btn-new').on 'click', ->
     queryName = 'New Query'
 
@@ -240,11 +225,6 @@ You can run, save, or delete queries using the buttons above
           $('.error-message .text').text(message)
 
           $('.error-message').removeClass('display-none')
-
-  $('.sql-results, .filter-results').on 'click', (e) ->
-    $target = $(e.currentTarget)
-
-    $target.hide()
 
   $('.btn-delete').on 'click', ->
     $query = $('.query.active')
