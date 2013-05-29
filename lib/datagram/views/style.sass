@@ -1,7 +1,7 @@
 $header-height: 50px
 
-$editor-height: 44%
-$editor-width: 85%
+$editor-height: 30%
+$editor-width: 42.5%%
 
 $file-tree-width: 15%
 
@@ -43,6 +43,12 @@ body
   position: absolute
   top: $header-height
   width: 100%
+
+.results-content
+  top: 30%
+  left: 15%
+  border-top: 1px solid rgba(0, 0, 0, 0.1)
+  padding-left: 0.5em
 
 .query-results
   position: absolute
@@ -87,21 +93,21 @@ body
     text-align: right
     width: 100%
 
+#editor
+  border-right: 1px solid rgba(0, 0, 0, 0.1)
+
 #editor, #filter-editor, .sql-results, .filter-results
   box-sizing: border-box
 
   left: $file-tree-width
-  right: 0
   width: $editor-width
   height: $editor-height
   position: absolute
   border-top: 1px solid rgba(0, 0, 0, 0.2)
+  top: 0
 
-#filter-editor, .filter-results
-  top: 45%
-
-.filter-results
-  height: 49%
+.filter-results, #filter-editor
+  left: 57.5%
 
 header
   height: $header-height
@@ -160,14 +166,6 @@ header
 
 #editor, .results-content, .sql-results
   position: absolute
-  top: 0
-
-.sql-results
-  height: 45%
-
-#editor
-  bottom: 0
-  height: 45%
 
 .run, .save
   position: absolute
