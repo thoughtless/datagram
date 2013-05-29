@@ -27,12 +27,15 @@ filterEditor.renderer.setShowGutter(false)
 
 filterSession.setTabSize(2)
 filterSession.setUseSoftTabs(true)
+
+skipSave = false
 ##
 
 $ ->
   setTimeout ->
     # default to selecting the last query
     if ($last = $('.query:last')).length
+      skipSave = true
       $last.click()
   , 1
 
@@ -119,11 +122,11 @@ $ ->
         filter: filterEditor.getValue()
         name: name
       dataType: 'json'
-      success: ->
+      success: (data) ->
         $icons.find('.icon-spinner').addClass('display-none')
         $icons.find('.icon-circle-blank').addClass('display-none')
         $icons.find('.icon-ok-circle').removeClass('display-none')
-        updateQuery()
+        updateQuery(data)
 
   debouncedSaveActiveQuery = _.debounce saveActiveQuery, 300
 
@@ -177,7 +180,10 @@ $ ->
   $('.file-tree').on 'click', '.query', (e) ->
     # save previous query before
     # messing with the active class
-    saveActiveQuery()
+    # unless it's during page load
+    saveActiveQuery() unless skipSave
+
+    skipSave = false
 
     $target = $(e.currentTarget)
 
