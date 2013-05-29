@@ -60,7 +60,7 @@ $ ->
 
     if ($query = $('.query.active')).length
       $query.text(newName)
-      $query.attr('data-name', newName)
+      $query.attr('data-name', newName.trim())
 
       saveActiveQuery()
 
@@ -157,6 +157,7 @@ $ ->
     $target = $(e.target)
 
     return if $target.is('.title .edit-title, .title h2')
+    return if $('.edit-title').is('.display-none')
 
     name = $('header .title .edit-title').val()
 
@@ -218,7 +219,7 @@ You can run, save, or delete queries using the buttons above
 // results will be used to build the report.
 // [results[0]]
 """
-        name: queryName
+        name: queryName.trim()
       dataType: 'json'
       success: (data) ->
         addQuery(data)
@@ -233,7 +234,7 @@ You can run, save, or delete queries using the buttons above
       data:
         content: editor.getValue()
         filter: filterEditor.getValue()
-        name: if queryName.length then queryName else 'new query'
+        name: if queryName.length then queryName.trim() else 'new query'
       dataType: 'json'
       success: (data) ->
         addQuery(data)
@@ -274,7 +275,7 @@ You can run, save, or delete queries using the buttons above
     alert "You must select a query to delete" unless $query.length
 
     id = $query.data('id')
-    queryName = if $query.data('name').length then $query.data('name') else "Query #{id}"
+    queryName = if $query.data('name').length then $query.data('name').trim() else "Query #{id}"
 
     if confirm "Are you sure you want to delete '#{queryName}'?"
       $.ajax
