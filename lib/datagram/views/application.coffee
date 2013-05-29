@@ -92,8 +92,21 @@ $ ->
 
       $('table tbody').append $tr
 
+  unsavedChanges = ->
+    $query = $('.query.active')
+    $icons = $query.next()
+
+    $icons.find('.icon-circle-blank').removeClass('display-none')
+    $icons.find('.icon-spinner').addClass('display-none')
+    $icons.find('.icon-ok-circle').addClass('display-none')
+
   saveActiveQuery = ->
     $query = $('.query.active')
+    $icons = $query.next()
+
+    $icons.find('.icon-ok-circle').addClass('display-none')
+    $icons.find('.icon-circle-blank').addClass('display-none')
+    $icons.find('.icon-spinner').removeClass('display-none')
 
     id = $query.data('id')
     name = $query.attr('data-name')
@@ -106,12 +119,21 @@ $ ->
         filter: filterEditor.getValue()
         name: name
       dataType: 'json'
-      success: updateQuery
+      success: ->
+        $icons.find('.icon-spinner').addClass('display-none')
+        $icons.find('.icon-circle-blank').addClass('display-none')
+        $icons.find('.icon-ok-circle').removeClass('display-none')
+        updateQuery()
 
   debouncedSaveActiveQuery = _.debounce saveActiveQuery, 300
 
-  editor.on 'change', debouncedSaveActiveQuery
-  filterEditor.on 'change', debouncedSaveActiveQuery
+  editor.on 'change', ->
+    unsavedChanges()
+    debouncedSaveActiveQuery()
+
+  filterEditor.on 'change', ->
+    unsavedChanges()
+    debouncedSaveActiveQuery()
 
   $('.icon-remove').on 'click', ->
     $('.error-message').addClass('display-none')
