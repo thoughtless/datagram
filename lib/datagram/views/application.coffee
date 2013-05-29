@@ -1,5 +1,6 @@
 ## configure editors
 editor = ace.edit('editor')
+
 editor.setTheme('ace/theme/tomorrow')
 editor.session.setMode('ace/mode/sql')
 
@@ -56,6 +57,8 @@ $ ->
       $query.text(newName)
       $query.attr('data-name', newName)
 
+      saveActiveQuery()
+
   exportResults = (data, filter) ->
     # export results to the global scope
     # so people can tweak them.
@@ -84,6 +87,27 @@ $ ->
         $tr.append "<td>#{value}</td>"
 
       $('table tbody').append $tr
+
+  saveActiveQuery = ->
+    $query = $('.query.active')
+
+    id = $query.data('id')
+    name = $query.attr('data-name')
+
+    $.ajax
+      type: 'PUT'
+      url: "/queries/#{id}"
+      data:
+        content: editor.getValue()
+        filter: filterEditor.getValue()
+        name: name
+      dataType: 'json'
+      success: updateQuery
+
+  debouncedSaveActiveQuery = _.debounce saveActiveQuery, 300
+
+  editor.on 'change', debouncedSaveActiveQuery
+  filterEditor.on 'change', debouncedSaveActiveQuery
 
   $('.icon-remove').on 'click', ->
     $('.error-message').addClass('display-none')
@@ -125,6 +149,10 @@ $ ->
     $target.next().removeClass('display-none').width(width).select()
 
   $('.file-tree').on 'click', '.query', (e) ->
+    # save previous query before
+    # messing with the active class
+    saveActiveQuery()
+
     $target = $(e.currentTarget)
 
     $('.query').removeClass 'active'
@@ -152,21 +180,32 @@ $ ->
       $('.query-content').removeClass('display-none')
       $('.results-content').addClass('display-none')
 
-  $('.btn-save').on 'click', ->
-    $query = $('.query.active')
-
-    id = $query.data('id')
-    name = $query.data('name')
+  $('.btn-new').on 'click', ->
+    queryName = 'New Query'
 
     $.ajax
-      type: 'PUT'
-      url: "/queries/#{id}"
+      type: 'POST'
+      url: '/queries'
       data:
-        content: editor.getValue()
-        filter: filterEditor.getValue()
-        name: name
+        content: """
+/*
+Enter your SQL query below.
+You can run, save, or delete queries using the buttons above
+*/
+        """
+        filter: """
+// Enter your JavaScript filter below.
+// Filters modify the returned SQL dataset
+// Query results are available for manipulation
+// via the global variable `results`. Your filtered
+// results will be used to build the report.
+// [results[0]]
+"""
+        name: queryName
       dataType: 'json'
-      success: updateQuery
+      success: (data) ->
+        addQuery(data)
+        $('.query:last').click()
 
   $('.btn-copy').on 'click', ->
     queryName = $('header .title .name').text()
