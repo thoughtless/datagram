@@ -1,3 +1,5 @@
+QUERY_LIMIT = 100
+
 ## configure editors
 editor = ace.edit('editor')
 
@@ -208,6 +210,11 @@ You can run, save, or delete queries using the buttons above
         $('.query:last').click()
 
   $('.btn-run').on 'click', ->
+    sql = editor.getValue()
+
+    unless (/limit/i).test(sql)
+      editor.setValue(sql + "\nLIMIT #{QUERY_LIMIT}")
+
     $.ajax
       type: 'GET'
       url: '/run'
