@@ -210,6 +210,8 @@ You can run, save, or delete queries using the buttons above
         $('.query:last').click()
 
   $('.btn-run').on 'click', ->
+    $('.query-spinner').removeClass('display-none')
+
     sql = editor.getValue()
 
     unless (/limit/i).test(sql)
@@ -222,10 +224,13 @@ You can run, save, or delete queries using the buttons above
         content: editor.getValue()
       dataType: 'json'
       success: (data) ->
+        $('.query-spinner').addClass('display-none')
+
         exportResults(data, filterEditor.getValue())
         resultsTable(data)
         displayResultsCount(data)
       error: (response) ->
+        $('.query-spinner').addClass('display-none')
         try
           {message} = JSON.parse(response.responseText)
 
