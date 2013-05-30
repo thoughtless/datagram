@@ -112,16 +112,30 @@ $ ->
   resultsTable = (data, filter) ->
     $('.results thead, .results tbody').empty()
 
-    for column in data.columns
-      $('table thead').append "<th>#{column}</th>"
+    if window.filteredResults?.length
+      # use the filtered keys as table headers
+      for column in _.keys(window.filteredResults[0])
+        $('table thead').append "<th>#{column}</th>"
 
-    for item in (if window.filteredResults?.length then window.filteredResults else window.results)
-      $tr = $('<tr>')
+      for item in window.filteredResults
+        $tr = $('<tr>')
 
-      for key, value of item
-        $tr.append "<td>#{value}</td>"
+        for key, value of item
+          $tr.append "<td>#{value}</td>"
 
-      $('table tbody').append $tr
+        $('table tbody').append $tr
+
+    else
+      for column in data.columns
+        $('table thead').append "<th>#{column}</th>"
+
+      for item in window.results
+        $tr = $('<tr>')
+
+        for key, value of item
+          $tr.append "<td>#{value}</td>"
+
+        $('table tbody').append $tr
 
   findQuery = (id) ->
     $(".query[data-id='#{id}']")
