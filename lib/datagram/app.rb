@@ -37,6 +37,14 @@ FROM users
         Query.create :content => content, :filter => filter, :name => name
       end
 
+      @schema = {}
+
+      self.class.reporting_db.tables.each do |table|
+        column_name = self.class.reporting_db.schema(table).map {|item| item.first}
+
+        @schema[table] = column_name
+      end
+
       @queries = Query.all
 
       haml :index

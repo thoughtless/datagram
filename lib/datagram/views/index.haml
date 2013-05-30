@@ -7,6 +7,13 @@
     %button.btn.btn-delete(title='Delete this query')
       %i.icon-trash
 
+  %form.navbar-search
+    %select.search-query(data-placeholder='View table columns')
+      -@schema.each_pair do |table_name, columns|
+        %optgroup(label="#{table_name}")
+          -columns.each do |col|
+            %option(value="#{col}")= col
+
   .btn-group.navigation
     %button.btn.btn-run(title='Run this query')
       %i.icon-play
@@ -56,3 +63,10 @@
 .query-spinner.display-none
   %span.text Crunching some numbers
   .icon-spinner.icon-spin.icon-large
+
+:javascript
+  $(function(){
+    $('.search-query').select2({
+      placeholder: 'View table columns'
+    });
+  });
