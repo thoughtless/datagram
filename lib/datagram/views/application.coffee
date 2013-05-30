@@ -31,6 +31,12 @@ filterSession.setUseSoftTabs(true)
 skipSave = false
 ##
 
+ICONS =
+  unsaved: '.icon-circle-blank'
+  saved: '.icon-ok-circle'
+  saving: '.icon-spinner'
+  locked: '.icon-lock'
+
 $ ->
   setTimeout ->
     # default to selecting the last query
@@ -39,12 +45,26 @@ $ ->
       $last.click()
   , 1
 
+  showIcon = ($icons, iconName) ->
+    $icons.children().addClass('display-none')
+    $icons.find(ICONS[iconName]).removeClass('display-none')
+
   addQuery = (data) ->
     queryName = if data.name.length then data.name else "Query #{data.id}"
 
     $query = "<li class='query' data-content='#{data.content}' data-filter='#{data.filter}' data-name='#{data.name}' data-id='#{data.id}''>#{queryName}.icon-circle-blank</li>"
 
     $('.queries').append $query
+
+  activeQuery = ->
+    $query = $('.query.active')
+
+    return {
+      id: $query.data('id')
+      name: $query.attr('data-name')
+      content: editor.getValue()
+      filter: filterEditor.getValue()
+    }
 
   updateQuery = (data) ->
     $query = $('.query.active')
@@ -54,15 +74,16 @@ $ ->
       'data-filter': data.filter
       'data-content': data.content
 
-  updateQueryName = (newName) ->
+  updateQueryName = (query, newName) ->
     $('header .title .name').removeClass('display-none').text(newName)
     $('header .title .edit-title').addClass('display-none')
 
-    if ($query = $('.query.active')).length
-      $query.text(newName)
-      $query.attr('data-name', newName.trim())
+    $query = findQuery(query.id)
 
-      saveActiveQuery()
+    $query.text(newName)
+    $query.attr('data-name', newName.trim())
+
+    saveQuery(query)
 
   exportResults = (data, filter) ->
     # export results to the global scope
@@ -95,48 +116,42 @@ $ ->
 
       $('table tbody').append $tr
 
-  unsavedChanges = ->
+  findQuery = (id) ->
+    $(".query[data-id='#{id}']")
+
+  unsavedChanges = (query) ->
     $query = $('.query.active')
     $icons = $query.next()
 
-    $icons.find('.icon-circle-blank').removeClass('display-none')
-    $icons.find('.icon-spinner').addClass('display-none')
-    $icons.find('.icon-ok-circle').addClass('display-none')
+    showIcon($icons, 'unsaved')
 
-  saveActiveQuery = ->
-    $query = $('.query.active')
+  saveQuery = (query) ->
+    $query = findQuery(query.id)
     $icons = $query.next()
 
-    $icons.find('.icon-ok-circle').addClass('display-none')
-    $icons.find('.icon-circle-blank').addClass('display-none')
-    $icons.find('.icon-spinner').removeClass('display-none')
-
-    id = $query.data('id')
-    name = $query.attr('data-name')
+    showIcon($icons, 'saving')
 
     $.ajax
       type: 'PUT'
-      url: "/queries/#{id}"
+      url: "/queries/#{query.id}"
       data:
-        content: editor.getValue()
-        filter: filterEditor.getValue()
-        name: name
+        content: query.content
+        filter: query.filter
+        name: query.name
       dataType: 'json'
       success: (data) ->
-        $icons.find('.icon-spinner').addClass('display-none')
-        $icons.find('.icon-circle-blank').addClass('display-none')
-        $icons.find('.icon-ok-circle').removeClass('display-none')
+        showIcon($icons, 'saved')
         updateQuery(data)
 
-  debouncedSaveActiveQuery = _.debounce saveActiveQuery, 300
+  debouncedSaveQuery = _.debounce saveQuery, 300
 
   editor.on 'change', ->
     unsavedChanges()
-    debouncedSaveActiveQuery()
+    debouncedSaveQuery(activeQuery())
 
   filterEditor.on 'change', ->
     unsavedChanges()
-    debouncedSaveActiveQuery()
+    debouncedSaveQuery(activeQuery())
 
   $('.icon-remove').on 'click', ->
     $('.error-message').addClass('display-none')
@@ -161,14 +176,14 @@ $ ->
 
     name = $('header .title .edit-title').val()
 
-    updateQueryName(name)
+    #updateQueryName(name)
 
   $('header .title .edit-title').on 'keydown', (e) ->
     return unless e.keyCode is 13
 
     name = $('header .title .edit-title').val()
 
-    updateQueryName(name)
+    #updateQueryName(name)
 
   $('header .title h2').on 'click', (e) ->
     $target = $(e.currentTarget)
@@ -182,7 +197,7 @@ $ ->
     # save previous query before
     # messing with the active class
     # unless it's during page load
-    saveActiveQuery() unless skipSave
+    saveQuery(activeQuery()) unless skipSave
 
     skipSave = false
 
@@ -270,12 +285,13 @@ You can run, save, or delete queries using the buttons above
           $('.error-message').removeClass('display-none')
 
   $('.btn-delete').on 'click', ->
-    $query = $('.query.active')
+    query = activeQuery()
 
-    alert "You must select a query to delete" unless $query.length
+    id = query.id
 
-    id = $query.data('id')
-    queryName = if $query.data('name').length then $query.data('name').trim() else "Query #{id}"
+    $query = findQuery(id)
+
+    queryName = if query.name.length then query.name.trim() else "Query #{id}"
 
     if confirm "Are you sure you want to delete '#{queryName}'?"
       $.ajax
