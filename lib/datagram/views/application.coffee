@@ -195,14 +195,14 @@ $ ->
     return if $target.is('.title .edit-title, .title h2')
     return if $('.edit-title').is('.display-none')
 
-    name = $('header .title .edit-title').val()
+    name = $('header .title .edit-title').val().trim()
 
     updateQueryName(name)
 
   $('header .title .edit-title').on 'keydown', (e) ->
     return unless e.keyCode is 13
 
-    name = $('header .title .edit-title').val()
+    name = $('header .title .edit-title').val().trim()
 
     updateQueryName(name)
 
@@ -231,8 +231,8 @@ $ ->
     editor.setValue $target.attr('data-content')
     filterEditor.setValue $target.attr('data-filter')
 
-    $('header .title .name').text($target.text())
-    $('header .title .edit-title').val($target.text())
+    $('header .title .name').text($target.text().trim())
+    $('header .title .edit-title').val($target.text().trim())
 
   $('.btn-new').on 'click', ->
     queryName = 'New Query'

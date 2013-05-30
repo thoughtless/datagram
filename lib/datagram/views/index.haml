@@ -20,7 +20,7 @@
     %h4.title Saved Queries
     %ul.queries
       -@queries.each do |query|
-        -queryName = query.name.nil? ? "Query #{query.id}" : query.name
+        -queryName = query.name.nil? ? "Query #{query.id}" : query.name.strip
 
         %li.query(data-content="#{query.content}" data-filter="#{query.filter}" data-name="#{query.name}" data-id="#{query.id}")
           =queryName

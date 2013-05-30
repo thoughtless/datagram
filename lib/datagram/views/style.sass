@@ -58,6 +58,9 @@ body
   .icon-spinner
     display: inline-block
 
+.file-tree, header, #editor, #filter-editor
+  position: fixed
+
 .error-message
   font-weight: bold
   position: absolute
@@ -81,16 +84,13 @@ body
     margin: auto
     height: 14px
 
-.query-content, .results-content
-  position: absolute
-  top: $header-height
-  width: 100%
-
 .results-content
-  top: 30%
+  box-sizing: border-box
+  top: 288px
   left: 15%
   border-top: 1px solid rgba(0, 0, 0, 0.1)
   padding-left: 0.5em
+  width: 85%
 
   h2
     margin-top: 0
@@ -105,6 +105,8 @@ body
   background-color: $file-tree-color
   width: $file-tree-width
   height: 100%
+  padding-top: $header-height
+  z-index: 1000
 
   .queries
     margin-left: 0
@@ -155,18 +157,16 @@ body
   left: $file-tree-width
   width: $editor-width
   height: $editor-height
-  position: absolute
   border-top: 1px solid rgba(0, 0, 0, 0.2)
-  top: 0
+  top: $header-height
 
 #filter-editor
   left: 57.5%
 
 header
   height: $header-height
-  position: absolute
   top: 0
-  z-index: 400
+  z-index: 1001
 
   background-image: linear-gradient(bottom, rgb(209,48,48) 65%, rgb(199,44,44) 60%)
   background-image: -o-linear-gradient(bottom, rgb(209,48,48) 65%, rgb(199,44,44) 60%)
@@ -218,7 +218,7 @@ header
   .btn-group.actions
     left: 10px
 
-#editor, .results-content, .sql-results
+.results-content, .sql-results
   position: absolute
 
 .run, .save
