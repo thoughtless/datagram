@@ -9,6 +9,8 @@ module Datagram
   class App < Sinatra::Base
     set :public_dir, File.expand_path('../public', __FILE__)
 
+    enable :logging
+    
     include Datagram::Model
 
     get '/' do
@@ -45,7 +47,7 @@ FROM users
       @filter = params[:filter] || ''
 
       begin
-        @ds = self.class.reporting_db.fetch(@content)
+        @ds = self.class.reporting_db.dataset.with_sql(@content)
         results = @ds.to_a
 
         status 200
@@ -101,9 +103,9 @@ FROM users
       end
     end
 
+    # Remove the datagram query from the database.
     delete '/queries/:id' do |id|
       @query = Query[id]
-
       @query.destroy
 
       status 204
@@ -121,7 +123,9 @@ FROM users
 
   private
     def self.reporting_db
-      @reporting_db ||= Sequel.connect(ENV['REPORTING_DATABASE_URL'])
+      @reporting_db ||= Sequel.connect(ENV['REPORTING_DATABASE_URL']).tap do |db|
+        db.logger = Datagram.logger
+      end
     end
   end
 end
