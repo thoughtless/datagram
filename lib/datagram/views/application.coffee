@@ -13,6 +13,8 @@ editor.renderer.setShowGutter(false)
 
 editorSession.setTabSize(2)
 editorSession.setUseSoftTabs(true)
+editorSession.setUseWrapMode(true)
+editorSession.setWrapLimitRange(null, null)
 
 filterEditor = ace.edit('filter-editor')
 filterEditor.setTheme('ace/theme/tomorrow')
@@ -27,6 +29,8 @@ filterEditor.renderer.setShowGutter(false)
 
 filterSession.setTabSize(2)
 filterSession.setUseSoftTabs(true)
+filterSession.setUseWrapMode(true)
+filterSession.setWrapLimitRange(null, null)
 
 skipSave = false
 ##
