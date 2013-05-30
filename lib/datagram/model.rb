@@ -12,7 +12,9 @@ module Datagram
 
     # Database that stores queries against the reporting database.
     def self.query_db
-      @query_db ||= Sequel.connect(ENV['QUERY_DATABASE_URL'] || QUERY_DATABASE_URL)
+      @query_db ||= Sequel.connect(ENV['QUERY_DATABASE_URL'] || QUERY_DATABASE_URL).tap do |db|
+        db.logger = Datagram.logger
+      end
     end
 
     # Migrate the Datagram query database.
