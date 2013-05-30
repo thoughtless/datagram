@@ -10,7 +10,7 @@ module Datagram
     set :public_dir, File.expand_path('../public', __FILE__)
 
     enable :logging
-    
+
     include Datagram::Model
 
     get '/' do
@@ -109,6 +109,32 @@ FROM users
       @query.destroy
 
       status 204
+    end
+
+    get '/queries/:id/download' do |id|
+      @query = Query[id]
+      queryName = @query.name || "Query #{id}"
+
+      @ds = self.class.reporting_db.fetch(@query.content)
+
+      columns = @ds.columns
+      table_body = @ds.to_a
+
+      headers "Content-Disposition" => "attachment;filename=#{queryName}.csv"
+
+      result = ""
+
+      result << columns.join(',') + "\n"
+
+      table_body.each do |row|
+        row.each_pair do |k, v|
+          result << "#{v},"
+        end
+
+        result << "\n"
+      end
+
+      result
     end
 
     # assets

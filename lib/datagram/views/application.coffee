@@ -111,8 +111,11 @@ $ ->
 
   resultsTable = (data, filter) ->
     $('.results thead, .results tbody').empty()
+    query = activeQuery()
 
     if window.filteredResults?.length
+      $('.btn.download').removeAttr('disabled').attr('href', "/queries/#{query.id}/download")
+
       # use the filtered keys as table headers
       for column in _.keys(window.filteredResults[0])
         $('table thead').append "<th>#{column}</th>"
@@ -125,7 +128,9 @@ $ ->
 
         $('table tbody').append $tr
 
-    else
+    else if window.results?.length
+      $('.btn.download').removeAttr('disabled').attr('href', "/queries/#{query.id}/download")
+
       for column in data.columns
         $('table thead').append "<th>#{column}</th>"
 

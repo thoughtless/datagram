@@ -39,7 +39,10 @@
 
   .results-content
     #results
-      %h2 Results
+      %h2
+        Results
+        %a.btn.download(disabled='disabled' href='#' title='Download query results')
+          %i.icon-download-alt
 
     .query-results
       %table.table.table-striped.results
