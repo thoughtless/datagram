@@ -74,16 +74,19 @@ $ ->
       'data-filter': data.filter
       'data-content': data.content
 
-  updateQueryName = (query, newName) ->
+  updateQueryName = (newName) ->
     $('header .title .name').removeClass('display-none').text(newName)
     $('header .title .edit-title').addClass('display-none')
 
-    $query = findQuery(query.id)
+    queryData = activeQuery()
+    queryData.name = newName
+
+    $query = findQuery(queryData.id)
 
     $query.text(newName)
     $query.attr('data-name', newName.trim())
 
-    saveQuery(query)
+    saveQuery(queryData)
 
   exportResults = (data, filter) ->
     # export results to the global scope
@@ -176,14 +179,14 @@ $ ->
 
     name = $('header .title .edit-title').val()
 
-    #updateQueryName(name)
+    updateQueryName(name)
 
   $('header .title .edit-title').on 'keydown', (e) ->
     return unless e.keyCode is 13
 
     name = $('header .title .edit-title').val()
 
-    #updateQueryName(name)
+    updateQueryName(name)
 
   $('header .title h2').on 'click', (e) ->
     $target = $(e.currentTarget)
