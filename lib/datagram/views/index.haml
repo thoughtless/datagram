@@ -7,13 +7,6 @@
     %button.btn.btn-delete(title='Delete this query')
       %i.icon-trash
 
-  %form.navbar-search
-    %select.search-query(data-placeholder='View table columns')
-      -@schema.each_pair do |table_name, columns|
-        %optgroup(label="#{table_name}")
-          -columns.each do |col|
-            %option(value="#{col}")= col
-
   .btn-group.navigation
     %button.btn.btn-run(title='Run this query')
       %i.icon-play
@@ -64,9 +57,26 @@
   %span.text Crunching some numbers
   .icon-spinner.icon-spin.icon-large
 
+.schema-overlay
+  .icon-remove-sign.icon-large
+  %h4 Database Schema
+  .schema
+    -@schema.each_pair do |table_name, columns|
+      .database-table
+        %h5.table-name= table_name
+        %ul
+          -columns.each do |col|
+            %li= col
+
 :javascript
-  $(function(){
-    $('.search-query').select2({
-      placeholder: 'View table columns'
+  $(function() {
+    $('.schema').isotope({
+      itemSelector : '.database-table',
+      masonry : {
+        columnWidth : 1
+      },
+      masonryHorizontal : {
+        rowHeight: 1
+      }
     });
   });
