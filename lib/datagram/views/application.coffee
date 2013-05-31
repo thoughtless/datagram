@@ -56,7 +56,7 @@ $ ->
   addQuery = (data) ->
     queryName = if data.name.length then data.name else "Query #{data.id}"
 
-    $query = "<li class='query' data-content='#{data.content}' data-filter='#{data.filter}' data-name='#{data.name}' data-id='#{data.id}''>#{queryName}</li>"
+    $query = "<li class='query' data-content='#{data.content}' data-filter='#{data.filter}' data-name='#{data.name}' data-id='#{data.id}'>#{queryName}</li>"
 
     $('.queries').append $query
 
