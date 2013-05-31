@@ -78,17 +78,24 @@ $ ->
       'data-filter': data.filter
       'data-content': data.content
 
-  updateQueryName = (newName) ->
-    $('header .title .name').removeClass('display-none').text(newName)
-    $('header .title .edit-title').addClass('display-none')
+  updateNameDOM = (newName) ->
+    name = newName.trim()
+
+    $('header .title .name').removeClass('display-none').text(name)
+    $('header .title .edit-title').addClass('display-none').val(name)
 
     queryData = activeQuery()
-    queryData.name = newName
 
     $query = findQuery(queryData.id)
 
-    $query.text(newName)
-    $query.attr('data-name', newName.trim())
+    $query.text(name)
+    $query.attr('data-name', name)
+
+  updateQueryName = (newName) ->
+    updateNameDOM(newName)
+
+    queryData = activeQuery()
+    queryData.name = newName.trim()
 
     saveQuery(queryData)
 
@@ -163,7 +170,7 @@ $ ->
       data:
         content: query.content
         filter: query.filter
-        name: query.name
+        name: query.name.trim()
       dataType: 'json'
       success: (data) ->
         showIcon($icons, 'saved')
@@ -200,14 +207,14 @@ $ ->
     return if $target.is('.title .edit-title, .title h2')
     return if $('.edit-title').is('.display-none')
 
-    name = $('header .title .edit-title').val().trim()
+    name = $('header .title .edit-title').val()
 
     updateQueryName(name)
 
   $('header .title .edit-title').on 'keydown', (e) ->
     return unless e.keyCode is 13
 
-    name = $('header .title .edit-title').val().trim()
+    name = $('header .title .edit-title').val()
 
     updateQueryName(name)
 
@@ -236,8 +243,7 @@ $ ->
     editor.setValue $target.attr('data-content')
     filterEditor.setValue $target.attr('data-filter')
 
-    $('header .title .name').text($target.text().trim())
-    $('header .title .edit-title').val($target.text().trim())
+    updateNameDOM($target.text().trim())
 
   $('.btn-new').on 'click', ->
     queryName = 'New Query'
