@@ -8,6 +8,8 @@
       %i.icon-trash
 
   .btn-group.navigation
+    %button.btn.btn-schema(title='Inspect database schema')
+      %i.icon-table
     %button.btn.btn-run(title='Run this query')
       %i.icon-play
 
@@ -39,7 +41,7 @@
 
   .results-content
     #results
-      %h2
+      %h3
         Results
         %a.btn.download(disabled='disabled' href='#' title='Download query results')
           %i.icon-download-alt
@@ -57,7 +59,7 @@
   %span.text Crunching some numbers
   .icon-spinner.icon-spin.icon-large
 
-.schema-overlay
+.schema-overlay.display-none
   .icon-remove-sign.icon-large
   %h4 Database Schema
   .schema
@@ -68,15 +70,3 @@
           -columns.each do |col|
             %li= col
 
-:javascript
-  $(function() {
-    $('.schema').isotope({
-      itemSelector : '.database-table',
-      masonry : {
-        columnWidth : 1
-      },
-      masonryHorizontal : {
-        rowHeight: 1
-      }
-    });
-  });

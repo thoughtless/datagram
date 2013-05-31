@@ -316,6 +316,19 @@ You can run, save, or delete queries using the buttons above
 
           $('.error-message').removeClass('display-none')
 
+  $('.btn-schema').on 'click', ->
+    $('.schema-overlay').removeClass 'display-none'
+
+    $('.schema').isotope
+      itemSelector: '.database-table'
+      masonry:
+        columnWidth: 1
+      masonryHorizontal:
+        rowHeight: 1
+
+  $('.schema-overlay .icon-remove-sign').on 'click', ->
+    $('.schema-overlay').addClass 'display-none'
+
   $('.btn-delete').on 'click', ->
     query = activeQuery()
 
