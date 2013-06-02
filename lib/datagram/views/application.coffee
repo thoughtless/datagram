@@ -353,9 +353,9 @@ You can run, save, or delete queries using the buttons above
         url: "queries/#{id}"
         dataType: 'json'
         success: ->
-          if ($next = $query.next()).length
+          if ($next = $query.nextAll('.query:first')).length
             $next.addClass 'active'
-          else if ($previous = $query.prev()).length
+          else if ($previous = $query.prevAll('.query:first')).length
             $previous.addClass 'active'
 
           $query.remove()
