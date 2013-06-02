@@ -56,9 +56,16 @@ $ ->
   addQuery = (data) ->
     queryName = if data.name.length then data.name else "Query #{data.id}"
 
-    $query = "<li class='query' data-content='#{data.content}' data-filter='#{data.filter}' data-name='#{data.name}' data-id='#{data.id}'>#{queryName}</li>"
+    $query = $("<li class='query' data-content='#{data.content}' data-filter='#{data.filter}' data-name='#{data.name}' data-id='#{data.id}'>#{queryName}</li>")
+
+    $icons = $("<div class='icons'></div>")
+    $icons.append $("<div class='icon-lock display-none'></div>"),
+      $("<div class='icon-circle-blank display-none'></div>"),
+      $("<div class='icon-spinner icon-spin display-none'></div>"),
+      $("<div class='icon-ok-circle display-none'></div>")
 
     $('.queries').append $query
+    $('.queries .query:last').after($icons)
 
   activeQuery = ->
     $query = $('.query.active')
@@ -157,6 +164,21 @@ $ ->
     $icons = $query.next()
 
     showIcon($icons, 'unsaved')
+
+  copyQuery = ->
+    query = activeQuery()
+
+    $.ajax
+      type: 'POST'
+      url: '/queries'
+      data:
+        content: query.content
+        filter: query.filter
+        name: query.name.trim()
+      dataType: 'json'
+      success: (data) ->
+        addQuery(data)
+        $('.query:last').click()
 
   saveQuery = (query) ->
     $query = findQuery(query.id)
@@ -272,20 +294,7 @@ You can run, save, or delete queries using the buttons above
         addQuery(data)
         $('.query:last').click()
 
-  $('.btn-copy').on 'click', ->
-    queryName = $('header .title .name').text()
-
-    $.ajax
-      type: 'POST'
-      url: '/queries'
-      data:
-        content: editor.getValue()
-        filter: filterEditor.getValue()
-        name: if queryName.length then queryName.trim() else 'new query'
-      dataType: 'json'
-      success: (data) ->
-        addQuery(data)
-        $('.query:last').click()
+  $('.btn-copy').on 'click', copyQuery
 
   $('.btn-run').on 'click', ->
     $('.query-spinner').removeClass('display-none')
