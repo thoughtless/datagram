@@ -125,24 +125,9 @@ FROM users
 
       @ds = self.class.reporting_db.fetch(@query.content)
 
-      columns = @ds.columns
-      table_body = @ds.to_a
-
       headers "Content-Disposition" => "attachment;filename=#{queryName}.csv"
 
-      result = ""
-
-      result << columns.join(',') + "\n"
-
-      table_body.each do |row|
-        row.each_pair do |k, v|
-          result << "#{v},"
-        end
-
-        result << "\n"
-      end
-
-      result
+      @ds.to_csv
     end
 
     # assets
