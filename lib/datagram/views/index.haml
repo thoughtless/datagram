@@ -23,8 +23,9 @@
     %ul.queries
       -@queries.each do |query|
         -queryName = query.name.nil? ? "Query #{query.id}" : query.name.strip
+        -active = query.id == id ? 'active' : ''
 
-        %li.query(data-content="#{query.content}" data-filter="#{query.filter}" data-name="#{query.name}" data-id="#{query.id}")
+        %li.query(class="#{active}" data-content="#{query.content}" data-filter="#{query.filter}" data-name="#{query.name}" data-id="#{query.id}")
           =queryName
         .icons
           .icon-lock.display-none(title='Lock query')

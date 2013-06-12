@@ -43,10 +43,11 @@ ICONS =
 
 $ ->
   setTimeout ->
-    # default to selecting the last query
-    if ($last = $('.query:last')).length
-      skipSave = true
-      $last.click()
+    # default to selecting the active query
+    # this is a hack to load content in the
+    # editor
+    skipSave = true
+    $('.query.active').click()
   , 1
 
   showIcon = ($icons, iconName) ->
@@ -266,6 +267,9 @@ $ ->
     filterEditor.setValue $target.attr('data-filter')
 
     updateNameDOM($target.text().trim())
+
+    # poor man's bookmarkability
+    history?.pushState?({}, "#{$target.attr('data-name')}", "/queries/#{$target.attr('data-id')}")
 
   $('.btn-new').on 'click', ->
     queryName = 'New Query'

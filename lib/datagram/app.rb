@@ -47,7 +47,7 @@ FROM users
 
       @queries = Query.all
 
-      haml :index
+      haml :index, :locals => {:id => (params[:id] || Query.last.id).to_i}
     end
 
     get '/run' do
@@ -82,6 +82,10 @@ FROM users
     end
 
     get '/queries/:id' do |id|
+      redirect "/?id=#{id}"
+    end
+
+    get '/queries/:id.json' do |id|
       if query = Query[id]
         @ds = self.class.reporting_db.fetch(query.content)
         results = @ds.to_a
