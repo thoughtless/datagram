@@ -56,7 +56,11 @@ FROM users
 
       begin
         @ds = self.class.reporting_db.dataset.with_sql(@content)
-        results = @ds.to_a
+
+        # gross way to make sure we get
+        # float formatted results rather
+        # than scientific notation
+        results = format(@ds)
 
         status 200
         body({:columns => @ds.columns, :items => results}.to_json)
@@ -141,6 +145,22 @@ FROM users
     end
 
   private
+    def format(results)
+      results.to_a.map do |row|
+        hash = {}
+
+        row.each_pair do |col_name, value|
+          if value.class == BigDecimal
+            hash[col_name] = value.to_f
+          else
+            hash[col_name] = value
+          end
+        end
+
+        hash
+      end
+    end
+
     def self.reporting_db
       @reporting_db ||= Sequel.connect(ENV['REPORTING_DATABASE_URL']).tap do |db|
         db.logger = Datagram.logger
