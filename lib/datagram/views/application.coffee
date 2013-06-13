@@ -1,7 +1,5 @@
 QUERY_LIMIT = 100
 
-console.log('break me')
-
 ## configure editors
 editor = ace.edit('editor')
 
