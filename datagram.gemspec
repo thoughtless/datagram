@@ -21,7 +21,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency "haml"
   gem.add_dependency "sass"
   gem.add_dependency "sequel"
-  gem.add_dependency "therubyracer"
+  gem.add_dependency "therubyracer", "0.11.4"
   gem.add_dependency "coffee-script"
   gem.add_dependency "json"
   gem.add_dependency "thor"
