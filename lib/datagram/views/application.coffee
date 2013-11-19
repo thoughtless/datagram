@@ -1,39 +1,44 @@
 QUERY_LIMIT = 100
 
+configureEditor = (selector, options={}) ->
+  editor = ace.edit(selector)
+  editor.setTheme "ace/theme/tomorrow"
+  editor.session.setMode "ace/mode/#{options.language}"
+
+  editor.setShowPrintMargin(false)
+  editor.renderer.setShowGutter(false)
+
+  editorSession = editor.getSession()
+  editorSession.setTabSize(2)
+  editorSession.setUseSoftTabs(true)
+  editorSession.setUseWrapMode(true)
+  editorSession.setWrapLimitRange(null, null)
+
+  editor
+
 ## configure editors
-editor = ace.edit('editor')
+editor = configureEditor "editor",
+  language: "sql"
 
-editor.setTheme('ace/theme/tomorrow')
-editor.session.setMode('ace/mode/sql')
-
-editorSession = editor.getSession()
-
-editor.setShowPrintMargin(false)
-editor.renderer.setShowGutter(false)
-
-editorSession.setTabSize(2)
-editorSession.setUseSoftTabs(true)
-editorSession.setUseWrapMode(true)
-editorSession.setWrapLimitRange(null, null)
-
-filterEditor = ace.edit('filter-editor')
-filterEditor.setTheme('ace/theme/tomorrow')
-filterEditor.session.setMode('ace/mode/javascript')
-
-filterSession = filterEditor.getSession()
-
-filterEditor.setShowPrintMargin(false)
-filterEditor.clearSelection()
-
-filterEditor.renderer.setShowGutter(false)
-
-filterSession.setTabSize(2)
-filterSession.setUseSoftTabs(true)
-filterSession.setUseWrapMode(true)
-filterSession.setWrapLimitRange(null, null)
-
-skipSave = false
+filterEditor = configureEditor "filter-editor",
+  language: "javascript"
 ##
+
+SQL_DEFAULT = """
+/*
+Enter your SQL query below.
+You can run, save, or delete queries using the buttons above
+*/
+"""
+
+FILTER_DEFAULT = """
+// Enter your JavaScript filter below.
+// Filters modify the returned SQL dataset
+// Query results are available for manipulation
+// via the global variable `results`. Your filtered
+// results will be used to build the report.
+// [results[0]]
+"""
 
 ICONS =
   unsaved: '.icon-circle-blank'
@@ -46,8 +51,7 @@ $ ->
     # default to selecting the active query
     # this is a hack to load content in the
     # editor
-    skipSave = true
-    $('.query.active').click()
+    selectQuery($(".query.active"))
   , 1
 
   showIcon = ($icons, iconName) ->
@@ -67,9 +71,10 @@ $ ->
 
     $('.queries').append $query
     $('.queries .query:last').after($icons)
+    selectQuery($(".query:last"))
 
   activeQuery = ->
-    $query = $('.query.active')
+    $query = $(".query.active")
 
     return {
       id: $query.data('id')
@@ -79,7 +84,7 @@ $ ->
     }
 
   updateQuery = (data) ->
-    $query = $('.query.active')
+    $query = $(".query.active")
 
     $query.attr
       'data-name': data.name
@@ -113,8 +118,7 @@ $ ->
     window.results = data.items
     console.log(results)
 
-    if filter.length
-      window.filteredResults = eval(filter)
+    window.filteredResults = eval(filter) if filter.length
 
   displayResultsCount = (data) ->
     $('.sql-results, .filter-results').show()
@@ -124,38 +128,34 @@ $ ->
     if window.filteredResults?
       $('.filter-results .count').text("#{window.filteredResults.length} results after applying JavaScript filter")
 
-  resultsTable = (data, filter) ->
-    $('.results thead, .results tbody').empty()
+  downloadPath = (query) ->
+    "/queries/#{query.id}/download"
+
+  renderTable = (collection, columns) ->
     query = activeQuery()
 
+    $('.btn.download')
+      .removeAttr('disabled')
+      .attr('href', downloadPath(query))
+
+    for column in columns
+      $('table thead').append "<th>#{column}</th>"
+
+    for item in collection
+      $tr = $('<tr>')
+
+      for key, value of item
+        $tr.append "<td>#{value}</td>"
+
+      $('table tbody').append $tr
+
+  resultsTable = (data, filter) ->
+    $('.results thead, .results tbody').empty()
+
     if window.filteredResults?.length
-      $('.btn.download').removeAttr('disabled').attr('href', "/queries/#{query.id}/download")
-
-      # use the filtered keys as table headers
-      for column in _.keys(window.filteredResults[0])
-        $('table thead').append "<th>#{column}</th>"
-
-      for item in window.filteredResults
-        $tr = $('<tr>')
-
-        for key, value of item
-          $tr.append "<td>#{value}</td>"
-
-        $('table tbody').append $tr
-
+      renderTable(filteredResults, _.keys(window.filteredResults[0]))
     else if window.results?.length
-      $('.btn.download').removeAttr('disabled').attr('href', "/queries/#{query.id}/download")
-
-      for column in data.columns
-        $('table thead').append "<th>#{column}</th>"
-
-      for item in window.results
-        $tr = $('<tr>')
-
-        for key, value of item
-          $tr.append "<td>#{value}</td>"
-
-        $('table tbody').append $tr
+      renderTable(results, data.columns)
 
   findQuery = (id) ->
     $(".query[data-id='#{id}']")
@@ -177,9 +177,7 @@ $ ->
         filter: query.filter
         name: query.name.trim()
       dataType: 'json'
-      success: (data) ->
-        addQuery(data)
-        $('.query:last').click()
+      success: addQuery
 
   saveQuery = (query) ->
     $query = findQuery(query.id)
@@ -198,6 +196,19 @@ $ ->
       success: (data) ->
         showIcon($icons, 'saved')
         updateQuery(data)
+
+  selectQuery = ($query) ->
+    $('.query').removeClass 'active'
+
+    $query.addClass 'active'
+
+    editor.setValue $query.attr('data-content')
+    filterEditor.setValue $query.attr('data-filter')
+
+    updateNameDOM($query.text().trim())
+
+    # poor man's bookmarkability
+    history?.pushState?({}, "#{$query.attr('data-name')}", "/queries/#{$query.attr('data-id')}")
 
   debouncedSaveQuery = _.debounce saveQuery, 300
 
@@ -250,26 +261,8 @@ $ ->
     $target.next().removeClass('display-none').width(width).select()
 
   $('.file-tree').on 'click', '.query', (e) ->
-    # save previous query before
-    # messing with the active class
-    # unless it's during page load
-    saveQuery(activeQuery()) unless skipSave
-
-    skipSave = false
-
-    $target = $(e.currentTarget)
-
-    $('.query').removeClass 'active'
-
-    $target.addClass 'active'
-
-    editor.setValue $target.attr('data-content')
-    filterEditor.setValue $target.attr('data-filter')
-
-    updateNameDOM($target.text().trim())
-
-    # poor man's bookmarkability
-    history?.pushState?({}, "#{$target.attr('data-name')}", "/queries/#{$target.attr('data-id')}")
+    saveQuery(activeQuery())
+    selectQuery($(e.currentTarget))
 
   $('.btn-new').on 'click', ->
     queryName = 'New Query'
@@ -278,25 +271,11 @@ $ ->
       type: 'POST'
       url: '/queries'
       data:
-        content: """
-/*
-Enter your SQL query below.
-You can run, save, or delete queries using the buttons above
-*/
-        """
-        filter: """
-// Enter your JavaScript filter below.
-// Filters modify the returned SQL dataset
-// Query results are available for manipulation
-// via the global variable `results`. Your filtered
-// results will be used to build the report.
-// [results[0]]
-"""
+        content: SQL_DEFAULT
+        filter: FILTER_DEFAULT
         name: queryName.trim()
       dataType: 'json'
-      success: (data) ->
-        addQuery(data)
-        $('.query:last').click()
+      success: addQuery
 
   $('.btn-copy').on 'click', copyQuery
 
@@ -354,7 +333,7 @@ You can run, save, or delete queries using the buttons above
     if confirm "Are you sure you want to delete '#{queryName}'?"
       $.ajax
         type: 'DELETE'
-        url: "queries/#{id}"
+        url: "/queries/#{id}"
         dataType: 'json'
         success: ->
           if ($next = $query.nextAll('.query:first')).length
@@ -362,4 +341,6 @@ You can run, save, or delete queries using the buttons above
           else if ($previous = $query.prevAll('.query:first')).length
             $previous.addClass 'active'
 
+          $query.next().remove() # icons element
           $query.remove()
+

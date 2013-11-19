@@ -5,6 +5,23 @@ require 'haml'
 require 'json'
 require 'v8'
 
+SQL_DEFAULT = """/*
+Enter your SQL query below.
+You can run, save, or delete queries using the buttons above
+*/
+
+SELECT *
+FROM users
+"""
+
+FILTER_DEFAULT = """// Enter your JavaScript filter below.
+// Filters modify the returned SQL dataset
+// Query results are available for manipulation
+// via the global variable `results`. Your filtered
+// results will be used to build the report.
+[results[0]]
+"""
+
 module Datagram
   class App < Sinatra::Base
     set :public_dir, File.expand_path('../public', __FILE__)
@@ -15,39 +32,24 @@ module Datagram
 
     get '/' do
       if Query.count == 0
-        content = """/*
-Enter your SQL query below.
-You can run, save, or delete queries using the buttons above
-*/
-
-SELECT *
-FROM users
-"""
-
-        filter = """// Enter your JavaScript filter below.
-// Filters modify the returned SQL dataset
-// Query results are available for manipulation
-// via the global variable `results`. Your filtered
-// results will be used to build the report.
-[results[0]]
-"""
-
-        name = 'default query'
-
-        Query.create :content => content, :filter => filter, :name => name
+        Query.create {
+          :content => SQL_DEFAULT,
+          :filter => FILTER_DEFAULT,
+          :name => "default query"
+        }
       end
 
       @schema = {}
 
-      self.class.reporting_db.tables.each do |table|
-        column_name = self.class.reporting_db.schema(table).map {|item| item.first}
-
-        @schema[table] = column_name
+      db.tables.each do |table|
+        @schema[table] = db.schema(table).map {|item| item.first}
       end
 
       @queries = Query.all
 
-      haml :index, :locals => {:id => (params[:id] || Query.last.id).to_i}
+      haml :index, :locals => {
+        :id => (params[:id] || Query.last.id).to_i
+      }
     end
 
     get '/run' do
@@ -55,7 +57,7 @@ FROM users
       @filter = params[:filter] || ''
 
       begin
-        @ds = self.class.reporting_db.dataset.with_sql(@content)
+        @ds = db.dataset.with_sql(@content)
 
         # gross way to make sure we get
         # float formatted results rather
@@ -87,7 +89,7 @@ FROM users
 
     get '/queries/:id.json' do |id|
       if query = Query[id]
-        @ds = self.class.reporting_db.fetch(query.content)
+        @ds = db.fetch(query.content)
         results = @ds.to_a
 
         context = V8::Context.new
@@ -108,18 +110,17 @@ FROM users
 
     put '/queries/:id' do |id|
       if query = Query[id]
-        name = params[:name] || "Query #{id}"
-        content = params[:content] || ''
-        filter = params[:filter] || ''
-
-        query.update_all :name => name, :content => content, :filter => filter
+        query.update_all {
+          :name => params[:name] || "Query #{id}",
+          :content => params[:content] || "",
+          :filter => params[:filter] || ""
+        }
 
         status 200
         body(query.to_json)
       end
     end
 
-    # Remove the datagram query from the database.
     delete '/queries/:id' do |id|
       @query = Query[id]
       @query.destroy
@@ -131,7 +132,7 @@ FROM users
       @query = Query[id]
       queryName = @query.name || "Query #{id}"
 
-      @ds = self.class.reporting_db.fetch(@query.content)
+      @ds = db.fetch(@query.content)
 
       headers "Content-Disposition" => "attachment;filename=#{queryName}.csv"
 
@@ -163,6 +164,10 @@ FROM users
 
         hash
       end
+    end
+
+    def db
+      self.class.reporting_db
     end
 
     def self.reporting_db
