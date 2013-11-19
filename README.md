@@ -62,6 +62,16 @@ $ QUERY_DATABASE_URL=sqlite://datagram.db \
 
 Now visit the website and you should be ready to write some queries!
 
+## Security
+
+Datagram makes no assumptions about security, so make sure you do the following in a production environment:
+
+1. Make sure the `REPORTING_DATABASE_URL` database is using an account with read-only permissions. You don't want users accidentally deleting data! Your database administrator should be able to set this.
+2. Its highly recommended that you only make datagram accessible via https. Transfering your database content over the wire in the clear is not a good idea.
+3. Datagram provides no authentication or authorizaiton services. The easiest way to implement a username and password is via HTTP Basic authorization through either a rack middleware or web server configuration over HTTPS.
+
+You've been warned!
+
 ## Contributing
 
 1. Fork it
