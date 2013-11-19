@@ -32,11 +32,7 @@ module Datagram
 
     get '/' do
       if Query.count == 0
-        Query.create {
-          :content => SQL_DEFAULT,
-          :filter => FILTER_DEFAULT,
-          :name => "default query"
-        }
+        Query.create :content => SQL_DEFAULT, :filter => FILTER_DEFAULT, :name => "default query"
       end
 
       @schema = {}
@@ -110,11 +106,7 @@ module Datagram
 
     put '/queries/:id' do |id|
       if query = Query[id]
-        query.update_all {
-          :name => params[:name] || "Query #{id}",
-          :content => params[:content] || "",
-          :filter => params[:filter] || ""
-        }
+        query.update_all :name => params[:name] || "Query #{id}", :content => params[:content] || "", :filter => params[:filter] || ""
 
         status 200
         body(query.to_json)
