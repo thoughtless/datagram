@@ -23,7 +23,7 @@ Or install it yourself as:
 
     $ gem install datagram
 
-## Create the query database and migrate to the most recent schema
+### Create the query database and migrate to the most recent schema
 
 Datagram stores queries in a Sqlite3 database by default. To setup the database run:
 
