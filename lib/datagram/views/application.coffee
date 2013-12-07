@@ -44,7 +44,6 @@ ICONS =
   unsaved: '.icon-circle-blank'
   saved: '.icon-ok-circle'
   saving: '.icon-spinner'
-  locked: '.icon-lock'
 
 $ ->
   setTimeout ->
@@ -56,6 +55,7 @@ $ ->
 
   showIcon = ($icons, iconName) ->
     $icons.children().addClass('display-none')
+    $icons.find(".icon-lock").removeClass("display-none")
     $icons.find(ICONS[iconName]).removeClass('display-none')
 
   addQuery = (data) ->
@@ -64,7 +64,7 @@ $ ->
     $query = $("<li class='query' data-content='#{data.content}' data-filter='#{data.filter}' data-name='#{data.name}' data-id='#{data.id}'>#{queryName}</li>")
 
     $icons = $("<div class='icons'></div>")
-    $icons.append $("<div class='icon-lock display-none'></div>"),
+    $icons.append $("<div class='icon-lock'></div>"),
       $("<div class='icon-circle-blank display-none'></div>"),
       $("<div class='icon-spinner icon-spin display-none'></div>"),
       $("<div class='icon-ok-circle display-none'></div>")
@@ -76,12 +76,17 @@ $ ->
   activeQuery = ->
     $query = $(".query.active")
 
-    return {
+    attrs = {
       id: $query.data('id')
-      name: $query.attr('data-name')
+      name: $query.attr('data-name').trim()
       content: editor.getValue()
       filter: filterEditor.getValue()
     }
+
+    if ($lock = $query.next().find(".icon-lock")).is(".locked")
+      attrs.locked_at = $lock.data("locked_at")
+
+    attrs
 
   updateQuery = (data) ->
     $query = $(".query.active")
@@ -172,10 +177,7 @@ $ ->
     $.ajax
       type: 'POST'
       url: '/queries'
-      data:
-        content: query.content
-        filter: query.filter
-        name: query.name.trim()
+      data: query
       dataType: 'json'
       success: addQuery
 
@@ -188,10 +190,7 @@ $ ->
     $.ajax
       type: 'PUT'
       url: "/queries/#{query.id}"
-      data:
-        content: query.content
-        filter: query.filter
-        name: query.name.trim()
+      data: query
       dataType: 'json'
       success: (data) ->
         showIcon($icons, 'saved')
@@ -265,15 +264,13 @@ $ ->
     selectQuery($(e.currentTarget))
 
   $('.btn-new').on 'click', ->
-    queryName = 'New Query'
-
     $.ajax
       type: 'POST'
       url: '/queries'
       data:
         content: SQL_DEFAULT
         filter: FILTER_DEFAULT
-        name: queryName.trim()
+        name: "New Query"
       dataType: 'json'
       success: addQuery
 
@@ -321,6 +318,21 @@ $ ->
   $('.schema-overlay .icon-remove-sign').on 'click', ->
     $('.schema-overlay').addClass 'display-none'
 
+  $(".icon-lock").on "click", ->
+    $this = $(this)
+
+    if $this.is(".locked")
+      $this.removeClass("locked")
+      $this.data("locked_at", null)
+    else
+      d = new Date
+      $this.addClass("locked")
+      $this.data("locked_at", d)
+      $this.attr("title", "Locked from modifications at #{d.toLocaleString()}")
+
+    selectQuery($this.parent().prev())
+    saveQuery(activeQuery())
+
   $('.btn-delete').on 'click', ->
     query = activeQuery()
 
@@ -328,7 +340,7 @@ $ ->
 
     $query = findQuery(id)
 
-    queryName = if query.name.length then query.name.trim() else "Query #{id}"
+    queryName = if query.name.length then query.name else "Query #{id}"
 
     if confirm "Are you sure you want to delete '#{queryName}'?"
       $.ajax
@@ -343,4 +355,3 @@ $ ->
 
           $query.next().remove() # icons element
           $query.remove()
-
