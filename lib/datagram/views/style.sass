@@ -64,7 +64,7 @@ body
   cursor: pointer
   opacity: 0.4
 
-  &.active
+  &.locked
     opacity: 1
 
 .icons
@@ -209,18 +209,10 @@ body
   padding-top: 5px
 
 header
+  background-color: rgb(209,48,48)
   height: $header-height
   top: 0
   z-index: 1001
-
-  background-image: linear-gradient(bottom, rgb(209,48,48) 65%, rgb(199,44,44) 60%)
-  background-image: -o-linear-gradient(bottom, rgb(209,48,48) 65%, rgb(199,44,44) 60%)
-  background-image: -moz-linear-gradient(bottom, rgb(209,48,48) 65%, rgb(199,44,44) 60%)
-  background-image: -webkit-linear-gradient(bottom, rgb(209,48,48) 65%, rgb(199,44,44) 60%)
-  background-image: -ms-linear-gradient(bottom, rgb(209,48,48) 65%, rgb(199,44,44) 60%)
-
-  background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0.65, rgb(209,48,48)), color-stop(0.6, rgb(199,44,44)))
-
   width: 100%
 
   .navbar-search
