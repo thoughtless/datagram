@@ -2,17 +2,18 @@ require 'sequel'
 
 module Datagram
   module Model
-    # Default sqlite3 database location for storing queries.
-    QUERY_DATABASE_URL = 'sqlite://datagram.db'
-
     # Returns the migration path for the CLI.
     MIGRATION_PATH = File.expand_path('../../../db/migrate', __FILE__)
 
     Sequel::Model.plugin :json_serializer
 
+    def self.query_db_url
+      ENV['QUERY_DATABASE_URL'] || 'sqlite://db/datagram_development.db'
+    end
+
     # Database that stores queries against the reporting database.
     def self.query_db
-      @query_db ||= Sequel.connect(ENV['QUERY_DATABASE_URL'] || QUERY_DATABASE_URL).tap do |db|
+      @query_db ||= Sequel.connect(self.query_db_url).tap do |db|
         db.logger = Datagram.logger
       end
     end

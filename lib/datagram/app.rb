@@ -106,7 +106,17 @@ module Datagram
 
     put '/queries/:id' do |id|
       if query = Query[id]
-        query.update_all :name => params[:name] || "Query #{id}", :content => params[:content] || "", :filter => params[:filter] || ""
+        attrs = {
+          :name => params[:name] || "Query #{id}",
+          :content => params[:content] || "",
+          :filter => params[:filter] || ""
+        }
+
+        if params.has_key?("locked_at")
+          attrs[:locked_at] = params[:locked_at]
+        end
+
+        query.update_all(attrs)
 
         status 200
         body(query.to_json)
