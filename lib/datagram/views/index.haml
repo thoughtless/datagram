@@ -29,7 +29,7 @@
         %li.query(class="#{active}" data-content="#{query.content}" data-filter="#{query.filter}" data-name="#{query.name}" data-id="#{query.id}")
           =queryName
         .icons
-          .icon-lock(title='Lock query' class="#{locked}")
+          .icon-lock(title='Lock query' class="#{locked}" data-locked_at="#{query.locked_at}")
           .icon-circle-blank.display-none(title='Unsaved query changes')
           .icon-spinner.icon-spin.display-none(title='Saving query')
           .icon-ok-circle.display-none(title='Query successfully saved')

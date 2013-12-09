@@ -82,7 +82,9 @@ $ ->
       content: editor.getValue()
       filter: filterEditor.getValue()
 
-    if ($lock = $query.next().find(".icon-lock")).is(".locked")
+    $icons = $query.next()
+
+    if ($lock = $icons.find(".icon-lock")).is(".locked")
       attrs.locked_at = $lock.data("locked_at")
     else
       attrs.locked_at = null
@@ -182,6 +184,21 @@ $ ->
       dataType: 'json'
       success: addQuery
 
+  saveLockedAt = (query) ->
+    $query = findQuery(query.id)
+    $icons = $query.next()
+
+    showIcon($icons, 'saving')
+
+    $.ajax
+      type: 'PUT'
+      url: "/queries/#{query.id}"
+      data:
+        locked_at: query.locked_at
+      dataType: 'json'
+      success: (data) ->
+        showIcon($icons, 'saved')
+
   saveQuery = (query) ->
     # short circuit if the query is locked
     return if query.locked_at
@@ -200,6 +217,14 @@ $ ->
         showIcon($icons, 'saved')
         updateQuery(data)
 
+  enableDelete = ($query) ->
+    $icons = $query.next()
+
+    if $icons.find(".icon-lock").is(".locked")
+      $(".btn-delete").addClass("disabled")
+    else
+      $(".btn-delete").removeClass("disabled")
+
   selectQuery = ($query) ->
     $('.query').removeClass 'active'
 
@@ -212,6 +237,8 @@ $ ->
 
     # poor man's bookmarkability
     history?.pushState?({}, "#{$query.attr('data-name')}", "/queries/#{$query.attr('data-id')}")
+
+    enableDelete($query)
 
   debouncedSaveQuery = _.debounce saveQuery, 300
 
@@ -336,10 +363,15 @@ $ ->
 
     $query = $this.parent().prev()
     selectQuery($query)
-    saveQuery(activeQuery())
+    enableDelete($query)
+    saveLockedAt activeQuery()
 
   $('.btn-delete').on 'click', ->
+    return if $(this).is(".disabled")
+
     query = activeQuery()
+
+    return alert "Locked queries can't be deleted" if query.locked_at
 
     id = query.id
 

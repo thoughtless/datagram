@@ -107,10 +107,16 @@ module Datagram
     put '/queries/:id' do |id|
       if query = Query[id]
         attrs = {
-          :name => params[:name] || "Query #{id}",
-          :content => params[:content] || "",
-          :filter => params[:filter] || "",
+          :name => params[:name] || "Query #{id}"
         }
+
+        if params.has_key?("content")
+          attrs[:content] = params[:content]
+        end
+
+        if params.has_key?("filter")
+          attrs[:filter] = params[:filter]
+        end
 
         if params.has_key?("locked_at")
           attrs[:locked_at] = params[:locked_at]
