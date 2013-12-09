@@ -76,15 +76,16 @@ $ ->
   activeQuery = ->
     $query = $(".query.active")
 
-    attrs = {
+    attrs =
       id: $query.data('id')
       name: $query.attr('data-name').trim()
       content: editor.getValue()
       filter: filterEditor.getValue()
-    }
 
     if ($lock = $query.next().find(".icon-lock")).is(".locked")
       attrs.locked_at = $lock.data("locked_at")
+    else
+      attrs.locked_at = null
 
     attrs
 
@@ -182,6 +183,9 @@ $ ->
       success: addQuery
 
   saveQuery = (query) ->
+    # short circuit if the query is locked
+    return if query.locked_at
+
     $query = findQuery(query.id)
     $icons = $query.next()
 
@@ -330,7 +334,8 @@ $ ->
       $this.data("locked_at", d)
       $this.attr("title", "Locked from modifications at #{d.toLocaleString()}")
 
-    selectQuery($this.parent().prev())
+    $query = $this.parent().prev()
+    selectQuery($query)
     saveQuery(activeQuery())
 
   $('.btn-delete').on 'click', ->

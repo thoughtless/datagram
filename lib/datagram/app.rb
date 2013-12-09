@@ -109,7 +109,7 @@ module Datagram
         attrs = {
           :name => params[:name] || "Query #{id}",
           :content => params[:content] || "",
-          :filter => params[:filter] || ""
+          :filter => params[:filter] || "",
         }
 
         if params.has_key?("locked_at")
